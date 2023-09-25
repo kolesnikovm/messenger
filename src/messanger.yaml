@@ -1,0 +1,4 @@
+server:
+  listenAddress: "0.0.0.0:9101"
+client:
+  serverAddress: "127.0.0.1:9101"

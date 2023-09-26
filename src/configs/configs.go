@@ -12,13 +12,23 @@ import (
 	"github.com/spf13/viper"
 )
 
+var vp *viper.Viper
+
 func init() {
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	vp = newViper()
+}
 
-	viper.SetDefault("listen_port", "9101")
+func newViper() *viper.Viper {
+	vp := viper.New()
 
-	viper.SetDefault("server_address", "127.0.0.1:9101")
+	vp.AutomaticEnv()
+	vp.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	vp.SetDefault("listen_port", "9101")
+
+	vp.SetDefault("server_address", "127.0.0.1:9101")
+
+	return vp
 }
 
 type Config interface {
@@ -54,14 +64,14 @@ func decodeHookFunc() mapstructure.DecodeHookFuncType {
 
 func load(cfgFile string) error {
 	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
+		vp.SetConfigFile(cfgFile)
 	} else {
-		viper.AddConfigPath(".")
-		viper.SetConfigType("yaml")
-		viper.SetConfigName("messenger")
+		vp.AddConfigPath(".")
+		vp.SetConfigType("yaml")
+		vp.SetConfigName("messenger")
 	}
 
-	if err := viper.ReadInConfig(); err != nil {
+	if err := vp.ReadInConfig(); err != nil {
 		switch err.(type) {
 		case viper.ConfigFileNotFoundError:
 			fmt.Printf("%s\n", err)
@@ -80,7 +90,7 @@ func new[V Config](cfgFile string, conf V) (V, error) {
 		return conf, err
 	}
 
-	if err := viper.Unmarshal(&conf, viper.DecodeHook(decodeHookFunc())); err != nil {
+	if err := vp.Unmarshal(&conf, viper.DecodeHook(decodeHookFunc())); err != nil {
 		return conf, err
 	}
 

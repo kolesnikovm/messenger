@@ -24,6 +24,6 @@ var Cmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		fmt.Printf("Messenger server listening on %s\n", config.ListenAddress)
+		fmt.Printf("Messenger server listening on %d\n", config.ListenPort)
 	},
 }

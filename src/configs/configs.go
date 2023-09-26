@@ -16,7 +16,7 @@ func init() {
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	viper.SetDefault("listen_address", "0.0.0.0:9101")
+	viper.SetDefault("listen_port", "9101")
 
 	viper.SetDefault("server_address", "127.0.0.1:9101")
 }
@@ -28,7 +28,7 @@ type Config interface {
 type Address string
 
 type ServerConfig struct {
-	ListenAddress string `mapstructure:"listen_address"`
+	ListenPort int `mapstructure:"listen_port"`
 }
 
 type ClientConfig struct {

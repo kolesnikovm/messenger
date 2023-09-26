@@ -1,4 +1,2 @@
-server:
-  listen_address: "0.0.0.0:9102"
-client:
-  server_address: "127.0.0.1:9102"
+listen_address: "0.0.0.0:9102"
+server_address: "127.0.0.1:9102"

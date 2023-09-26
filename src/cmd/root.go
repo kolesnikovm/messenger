@@ -6,7 +6,6 @@ import (
 
 	"github.com/kolesnikovm/messenger/cmd/client"
 	"github.com/kolesnikovm/messenger/cmd/server"
-	"github.com/kolesnikovm/messenger/configs"
 	"github.com/spf13/cobra"
 )
 
@@ -26,25 +25,10 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
-
 	rootCmd.AddCommand(
 		server.Cmd,
 		client.Cmd,
 	)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./messenger.yaml)")
-}
-
-func initConfig() {
-	if err := configs.Load(cfgFile); err != nil {
-		fmt.Printf("failed to load config file: %s\n", err)
-	}
-
-	config, err := configs.New()
-	if err != nil {
-		fmt.Printf("failed to instantiate config file: %s\n", err)
-		os.Exit(1)
-	}
-	fmt.Printf("using config: %+v\n", config)
 }

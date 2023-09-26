@@ -1,10 +1,14 @@
 package configs
 
 import (
+	"errors"
 	"fmt"
+	"net"
 	"os"
+	"reflect"
 	"strings"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 )
 
@@ -21,12 +25,31 @@ type Config interface {
 	ServerConfig | ClientConfig
 }
 
+type Address string
+
 type ServerConfig struct {
 	ListenAddress string `mapstructure:"listen_address"`
 }
 
 type ClientConfig struct {
-	ServerAddress string `mapstructure:"server_address"`
+	ServerAddress Address `mapstructure:"server_address"`
+}
+
+func decodeHookFunc() mapstructure.DecodeHookFuncType {
+	return func(v, t reflect.Type, data interface{}) (interface{}, error) {
+
+		if t == reflect.TypeOf(Address("")) {
+			host, _, err := net.SplitHostPort(data.(string))
+			if err != nil {
+				return nil, err
+			}
+			if host == "" {
+				return nil, errors.New("failed to parse address - empty host")
+			}
+		}
+
+		return data, nil
+	}
 }
 
 func load(cfgFile string) error {
@@ -57,7 +80,7 @@ func new[V Config](cfgFile string, conf V) (V, error) {
 		return conf, err
 	}
 
-	if err := viper.Unmarshal(&conf); err != nil {
+	if err := viper.Unmarshal(&conf, viper.DecodeHook(decodeHookFunc())); err != nil {
 		return conf, err
 	}
 

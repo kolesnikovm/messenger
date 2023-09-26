@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/kolesnikovm/messanger/cmd"
+	"github.com/kolesnikovm/messenger/cmd"
 )
 
 func main() {

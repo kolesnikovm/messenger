@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kolesnikovm/messanger/cmd/client"
-	"github.com/kolesnikovm/messanger/cmd/server"
-	"github.com/kolesnikovm/messanger/configs"
+	"github.com/kolesnikovm/messenger/cmd/client"
+	"github.com/kolesnikovm/messenger/cmd/server"
+	"github.com/kolesnikovm/messenger/configs"
 	"github.com/spf13/cobra"
 )
 
 var cfgFile string
 
 var rootCmd = &cobra.Command{
-	Use:  "messanger",
-	Long: `Messanger application allows you to communicate with other clients via Messanger server.`,
+	Use:  "messenger",
+	Long: `Messenger application allows you to communicate with other clients via Messenger server.`,
 }
 
 func Execute() {
@@ -33,7 +33,7 @@ func init() {
 		client.Cmd,
 	)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./messanger.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./messenger.yaml)")
 }
 
 func initConfig() {

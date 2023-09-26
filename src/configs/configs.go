@@ -31,7 +31,7 @@ func Load(cfgFile string) error {
 	} else {
 		viper.AddConfigPath(".")
 		viper.SetConfigType("yaml")
-		viper.SetConfigName("messanger")
+		viper.SetConfigName("messenger")
 	}
 
 	if err := viper.ReadInConfig(); err != nil {

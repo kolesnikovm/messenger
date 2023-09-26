@@ -1,4 +1,4 @@
-module github.com/kolesnikovm/messanger
+module github.com/kolesnikovm/messenger
 
 go 1.21.1
 

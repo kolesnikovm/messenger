@@ -1,23 +1,26 @@
 package configs
 
 import (
+	"strings"
+
 	"github.com/spf13/viper"
 )
 
 func init() {
 	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	viper.SetDefault("server.listenAddress", "0.0.0.0:9101")
+	viper.SetDefault("server.listen_address", "0.0.0.0:9101")
 
-	viper.SetDefault("client.serverAddress", "127.0.0.1:9101")
+	viper.SetDefault("client.server_address", "127.0.0.1:9101")
 }
 
 type Server struct {
-	ListenAddress string `mapstructure:"listenAddress"`
+	ListenAddress string `mapstructure:"listen_address"`
 }
 
 type Client struct {
-	ServerAddress string `mapstructure:"serverAddress"`
+	ServerAddress string `mapstructure:"server_address"`
 }
 
 type Config struct {

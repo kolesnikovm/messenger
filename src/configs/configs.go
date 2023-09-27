@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
@@ -35,7 +36,10 @@ type Config interface {
 	ServerConfig | ClientConfig
 }
 
-type Address string
+type Address struct {
+	Host string
+	Port int
+}
 
 type ServerConfig struct {
 	ListenPort int `mapstructure:"listen_port"`
@@ -48,14 +52,24 @@ type ClientConfig struct {
 func decodeHookFunc() mapstructure.DecodeHookFuncType {
 	return func(v, t reflect.Type, data interface{}) (interface{}, error) {
 
-		if t == reflect.TypeOf(Address("")) {
-			host, _, err := net.SplitHostPort(data.(string))
+		if t == reflect.TypeOf(Address{}) {
+			host, port, err := net.SplitHostPort(data.(string))
 			if err != nil {
 				return nil, err
 			}
 			if host == "" {
 				return nil, errors.New("failed to parse address - empty host")
 			}
+
+			p, err := strconv.Atoi(port)
+			if err != nil {
+				return nil, err
+			}
+
+			return &Address{
+				Host: host,
+				Port: p,
+			}, nil
 		}
 
 		return data, nil

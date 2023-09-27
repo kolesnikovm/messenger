@@ -21,6 +21,6 @@ var Cmd = &cobra.Command{
 			log.Fatal().Err(err).Msg("failed to instantiate config")
 		}
 
-		log.Info().Msgf("Messenger client connected to %s", config.ServerAddress)
+		log.Info().Msgf("Messenger client connected to %+v", config.ServerAddress)
 	},
 }

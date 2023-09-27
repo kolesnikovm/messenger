@@ -1,17 +1,26 @@
 package server
 
 import (
-	"fmt"
-
-	"github.com/kolesnikovm/messanger/configs"
+	"github.com/kolesnikovm/messenger/configs"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
 var Cmd = &cobra.Command{
 	Use:   "server",
-	Short: "Start messanger in server mode",
+	Short: "Start messenger in server mode",
 	Run: func(cmd *cobra.Command, args []string) {
-		conf, _ := configs.New()
-		fmt.Printf("Messanger server listening on %s\n", conf.Server.ListenAddress)
+		configFile, err := cmd.InheritedFlags().GetString("config")
+		if err != nil {
+			log.Fatal().Err(err).Msg("")
+		}
+
+		// check config is ok
+		config, err := configs.NewServerConfig(configFile)
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to instantiate config")
+		}
+
+		log.Info().Msgf("Messenger server listening on %d", config.ListenPort)
 	},
 }

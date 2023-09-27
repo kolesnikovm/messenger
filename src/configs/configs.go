@@ -1,52 +1,122 @@
 package configs
 
 import (
+	"errors"
+	"net"
+	"os"
+	"reflect"
+	"strconv"
+	"strings"
+
+	"github.com/mitchellh/mapstructure"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
+var vp *viper.Viper
+
 func init() {
-	viper.AutomaticEnv()
-
-	viper.SetDefault("server.listenAddress", "0.0.0.0:9101")
-
-	viper.SetDefault("client.serverAddress", "127.0.0.1:9101")
+	vp = newViper()
 }
 
-type Server struct {
-	ListenAddress string `mapstructure:"listenAddress"`
+func newViper() *viper.Viper {
+	vp := viper.New()
+
+	vp.AutomaticEnv()
+	vp.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	vp.SetDefault("listen_port", "9101")
+
+	vp.SetDefault("server_address", "127.0.0.1:9101")
+
+	return vp
 }
 
-type Client struct {
-	ServerAddress string `mapstructure:"serverAddress"`
+type Config interface {
+	ServerConfig | ClientConfig
 }
 
-type Config struct {
-	Server Server `mapstructure:"server"`
-	Client Client `mapstructure:"client"`
+type Address struct {
+	Host string
+	Port int
 }
 
-func Load(cfgFile string) error {
+type ServerConfig struct {
+	ListenPort int `mapstructure:"listen_port"`
+}
+
+type ClientConfig struct {
+	ServerAddress Address `mapstructure:"server_address"`
+}
+
+func decodeHookFunc() mapstructure.DecodeHookFuncType {
+	return func(v, t reflect.Type, data interface{}) (interface{}, error) {
+
+		if t == reflect.TypeOf(Address{}) {
+			host, port, err := net.SplitHostPort(data.(string))
+			if err != nil {
+				return nil, err
+			}
+			if host == "" {
+				return nil, errors.New("failed to parse address - empty host")
+			}
+
+			p, err := strconv.Atoi(port)
+			if err != nil {
+				return nil, err
+			}
+
+			return &Address{
+				Host: host,
+				Port: p,
+			}, nil
+		}
+
+		return data, nil
+	}
+}
+
+func load(cfgFile string) error {
 	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
+		vp.SetConfigFile(cfgFile)
 	} else {
-		viper.AddConfigPath(".")
-		viper.SetConfigType("yaml")
-		viper.SetConfigName("messanger")
+		vp.AddConfigPath(".")
+		vp.SetConfigType("yaml")
+		vp.SetConfigName("messenger")
 	}
 
-	if err := viper.ReadInConfig(); err != nil {
-		return err
+	if err := vp.ReadInConfig(); err != nil {
+		switch err.(type) {
+		case viper.ConfigFileNotFoundError:
+			log.Error().Err(err).Msg("")
+		case *os.PathError:
+			log.Error().Err(err).Msg("")
+		default:
+			return err
+		}
 	}
 
 	return nil
 }
 
-func New() (Config, error) {
-	var conf Config
+func new[V Config](cfgFile string, conf V) (V, error) {
+	if err := load(cfgFile); err != nil {
+		return conf, err
+	}
 
-	if err := viper.Unmarshal(&conf); err != nil {
+	if err := vp.Unmarshal(&conf, viper.DecodeHook(decodeHookFunc())); err != nil {
 		return conf, err
 	}
 
 	return conf, nil
+}
+
+func NewClientConfig(cfgFile string) (ClientConfig, error) {
+	var conf ClientConfig
+	return new(cfgFile, conf)
+}
+
+func NewServerConfig(cfgFile string) (ServerConfig, error) {
+	var conf ServerConfig
+	return new(cfgFile, conf)
 }

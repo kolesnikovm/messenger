@@ -1,10 +1,8 @@
 package client
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/kolesnikovm/messenger/configs"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -14,16 +12,15 @@ var Cmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		configFile, err := cmd.InheritedFlags().GetString("config")
 		if err != nil {
-			fmt.Printf("%s\n", err)
+			log.Fatal().Err(err).Msg("")
 		}
 
 		// check config is ok
 		config, err := configs.NewClientConfig(configFile)
 		if err != nil {
-			fmt.Printf("failed to instantiate config: %s\n", err)
-			os.Exit(1)
+			log.Fatal().Err(err).Msg("failed to instantiate config")
 		}
 
-		fmt.Printf("Messenger client connected to %s\n", config.ServerAddress)
+		log.Info().Msgf("Messenger client connected to %s", config.ServerAddress)
 	},
 }

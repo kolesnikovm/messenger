@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/kolesnikovm/messenger/cmd/client"
 	"github.com/kolesnikovm/messenger/cmd/server"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -19,8 +17,7 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
-		fmt.Printf("failed to execute root cmd: %s", err)
-		os.Exit(1)
+		log.Fatal().Err(err).Msg("failed to execute root cmd")
 	}
 }
 

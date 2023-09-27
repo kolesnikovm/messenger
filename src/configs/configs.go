@@ -2,13 +2,13 @@ package configs
 
 import (
 	"errors"
-	"fmt"
 	"net"
 	"os"
 	"reflect"
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
@@ -74,9 +74,9 @@ func load(cfgFile string) error {
 	if err := vp.ReadInConfig(); err != nil {
 		switch err.(type) {
 		case viper.ConfigFileNotFoundError:
-			fmt.Printf("%s\n", err)
+			log.Error().Err(err).Msg("")
 		case *os.PathError:
-			fmt.Printf("%s\n", err)
+			log.Error().Err(err).Msg("")
 		default:
 			return err
 		}

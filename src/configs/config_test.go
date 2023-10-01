@@ -32,6 +32,8 @@ func TestNewClientConfig(t *testing.T) {
 	}{
 		{
 			name:      "default_config",
+			setup:     func() {},
+			teardown:  func() {},
 			cfgFile:   "",
 			exrResult: Address{Host: "127.0.0.1", Port: 9101},
 		},
@@ -67,12 +69,8 @@ func TestNewClientConfig(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if testCase.setup != nil {
-				testCase.setup()
-			}
-			if testCase.teardown != nil {
-				defer testCase.teardown()
-			}
+			testCase.setup()
+			defer testCase.teardown()
 
 			config, err := NewClientConfig(testCase.cfgFile)
 
@@ -90,8 +88,10 @@ func TestNewClientConfigError(t *testing.T) {
 		cfgFile  string
 	}{
 		{
-			name:    "wrong_extention",
-			cfgFile: "/not/exists",
+			name:     "wrong_extention",
+			setup:    func() {},
+			teardown: func() {},
+			cfgFile:  "/not/exists",
 		},
 		{
 			name: "wrong_format",
@@ -126,12 +126,8 @@ func TestNewClientConfigError(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if testCase.setup != nil {
-				testCase.setup()
-			}
-			if testCase.teardown != nil {
-				defer testCase.teardown()
-			}
+			testCase.setup()
+			defer testCase.teardown()
 
 			_, err := NewClientConfig(testCase.cfgFile)
 
@@ -150,6 +146,8 @@ func TestNewServerConfig(t *testing.T) {
 	}{
 		{
 			name:      "default_config",
+			setup:     func() {},
+			teardown:  func() {},
 			cfgFile:   "",
 			exrResult: 9101,
 		},
@@ -157,12 +155,8 @@ func TestNewServerConfig(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if testCase.setup != nil {
-				testCase.setup()
-			}
-			if testCase.teardown != nil {
-				defer testCase.teardown()
-			}
+			testCase.setup()
+			defer testCase.teardown()
 
 			config, err := NewServerConfig(testCase.cfgFile)
 
@@ -189,12 +183,8 @@ func TestNewServerConfigError(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if testCase.setup != nil {
-				testCase.setup()
-			}
-			if testCase.teardown != nil {
-				defer testCase.teardown()
-			}
+			testCase.setup()
+			defer testCase.teardown()
 
 			_, err := NewServerConfig(testCase.cfgFile)
 

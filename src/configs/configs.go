@@ -13,12 +13,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var vp *viper.Viper
-
-func init() {
-	vp = newViper()
-}
-
 func newViper() *viper.Viper {
 	vp := viper.New()
 
@@ -76,7 +70,9 @@ func decodeHookFunc() mapstructure.DecodeHookFuncType {
 	}
 }
 
-func load(cfgFile string) error {
+func load(cfgFile string) (*viper.Viper, error) {
+	vp := newViper()
+
 	if cfgFile != "" {
 		vp.SetConfigFile(cfgFile)
 	} else {
@@ -92,15 +88,16 @@ func load(cfgFile string) error {
 		case *os.PathError:
 			log.Error().Err(err).Msg("")
 		default:
-			return err
+			return vp, err
 		}
 	}
 
-	return nil
+	return vp, nil
 }
 
-func new[V Config](cfgFile string, conf V) (V, error) {
-	if err := load(cfgFile); err != nil {
+func newConf[V Config](cfgFile string, conf V) (V, error) {
+	vp, err := load(cfgFile)
+	if err != nil {
 		return conf, err
 	}
 
@@ -113,10 +110,10 @@ func new[V Config](cfgFile string, conf V) (V, error) {
 
 func NewClientConfig(cfgFile string) (ClientConfig, error) {
 	var conf ClientConfig
-	return new(cfgFile, conf)
+	return newConf(cfgFile, conf)
 }
 
 func NewServerConfig(cfgFile string) (ServerConfig, error) {
 	var conf ServerConfig
-	return new(cfgFile, conf)
+	return newConf(cfgFile, conf)
 }

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option go_package = "github.com/kolesnikovm/messenger/message";
+
+service Messenger {
+    rpc SendMessage(stream Message) returns (Status) {}
+}
+
+message Message {
+    string text = 1;
+}
+
+message Status {
+    int32 errorCount = 1;
+}

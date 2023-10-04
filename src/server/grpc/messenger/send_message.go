@@ -4,7 +4,6 @@ import (
 	"io"
 
 	"github.com/kolesnikovm/messenger/proto"
-	"github.com/rs/zerolog/log"
 )
 
 func (s *Handler) SendMessage(stream proto.Messenger_SendMessageServer) error {
@@ -17,7 +16,6 @@ func (s *Handler) SendMessage(stream proto.Messenger_SendMessageServer) error {
 			})
 		}
 		if err != nil {
-			log.Error().Err(err).Msg("")
 			return err
 		}
 
@@ -25,7 +23,6 @@ func (s *Handler) SendMessage(stream proto.Messenger_SendMessageServer) error {
 
 		err = s.Usecase.Send(m)
 		if err != nil {
-			log.Error().Err(err).Msg("failed to send message")
 			errorCount++
 		}
 	}

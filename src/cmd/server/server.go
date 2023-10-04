@@ -38,6 +38,7 @@ var Cmd = &cobra.Command{
 			MessengerServer: &messenger.Handler{
 				Usecase: messageUseCase,
 			},
+			Interceptor: grpc.NewInterceptor(),
 		}
 		server := serverBuilder.Build()
 

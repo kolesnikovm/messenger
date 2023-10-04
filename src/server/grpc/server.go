@@ -7,10 +7,13 @@ import (
 
 type ServerBuilder struct {
 	MessengerServer proto.MessengerServer
+	Interceptor     grpc.StreamServerInterceptor
 }
 
 func (s *ServerBuilder) Build() *grpc.Server {
-	srv := grpc.NewServer()
+	srv := grpc.NewServer(
+		grpc.StreamInterceptor(s.Interceptor),
+	)
 	proto.RegisterMessengerServer(srv, s.MessengerServer)
 
 	return srv

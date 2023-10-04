@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/kolesnikovm/messenger/message";
+option go_package = "github.com/kolesnikovm/messenger/proto";
 
 service Messenger {
     rpc SendMessage(stream Message) returns (Status) {}

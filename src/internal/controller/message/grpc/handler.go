@@ -5,7 +5,7 @@ import (
 
 	"github.com/kolesnikovm/messenger/internal/entity"
 	usecase "github.com/kolesnikovm/messenger/internal/usecase/message"
-	pb "github.com/kolesnikovm/messenger/proto/message"
+	pb "github.com/kolesnikovm/messenger/proto"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 )

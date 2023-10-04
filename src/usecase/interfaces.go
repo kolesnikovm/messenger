@@ -1,7 +1,7 @@
-package message
+package usecase
 
 import (
-	"github.com/kolesnikovm/messenger/internal/entity"
+	"github.com/kolesnikovm/messenger/entity"
 )
 
 type Message interface {

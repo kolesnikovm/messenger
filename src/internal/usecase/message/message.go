@@ -5,13 +5,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type Usecase struct{}
+type MessageUseCase struct{}
 
-func New() *Usecase {
-	return &Usecase{}
+func New() *MessageUseCase {
+	return &MessageUseCase{}
 }
 
-func (uc *Usecase) Send(message entity.Message) error {
+func (uc *MessageUseCase) Send(message entity.Message) error {
 	log.Info().Msgf("new message: %s", message.Text)
 	return nil
 }

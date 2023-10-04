@@ -68,21 +68,19 @@ func (x *messengerSendMessageClient) CloseAndRecv() (*Status, error) {
 }
 
 // MessengerServer is the server API for Messenger service.
-// All implementations must embed UnimplementedMessengerServer
+// All implementations should embed UnimplementedMessengerServer
 // for forward compatibility
 type MessengerServer interface {
 	SendMessage(Messenger_SendMessageServer) error
-	mustEmbedUnimplementedMessengerServer()
 }
 
-// UnimplementedMessengerServer must be embedded to have forward compatible implementations.
+// UnimplementedMessengerServer should be embedded to have forward compatible implementations.
 type UnimplementedMessengerServer struct {
 }
 
 func (UnimplementedMessengerServer) SendMessage(Messenger_SendMessageServer) error {
 	return status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
 }
-func (UnimplementedMessengerServer) mustEmbedUnimplementedMessengerServer() {}
 
 // UnsafeMessengerServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to MessengerServer will

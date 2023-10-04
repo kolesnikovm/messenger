@@ -12,8 +12,6 @@ import (
 
 type server struct {
 	usecase usecase.Message
-
-	pb.UnimplementedMessengerServer
 }
 
 func NewMessageServerGrpc(gs *grpc.Server, messageUsacase usecase.Message) {
@@ -33,7 +31,7 @@ func (s *server) transformMessageRPC(msg *pb.Message) entity.Message {
 	return res
 }
 
-func (s *server) Send(stream pb.Messenger_SendMessageServer) error {
+func (s *server) SendMessage(stream pb.Messenger_SendMessageServer) error {
 	errorCount := int32(0)
 	for {
 		message, err := stream.Recv()

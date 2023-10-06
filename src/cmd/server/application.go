@@ -1,13 +1,15 @@
 package server
 
-import "github.com/kolesnikovm/messenger/server/grpc"
+import (
+	"google.golang.org/grpc"
+)
 
 type application struct {
-	grpcServerBuilder *grpc.ServerBuilder
+	grpcServer *grpc.Server
 }
 
-func newApplication(grpcServerBuilder *grpc.ServerBuilder) *application {
+func newApplication(grpcServer *grpc.Server) *application {
 	return &application{
-		grpcServerBuilder: grpcServerBuilder,
+		grpcServer: grpcServer,
 	}
 }

@@ -30,10 +30,9 @@ var Cmd = &cobra.Command{
 		}
 
 		app := InitializeApplication()
-		grpcServer := app.grpcServerBuilder.Build()
 
 		log.Info().Msgf("Messenger server listening on %v", lis.Addr())
-		if err := grpcServer.Serve(lis); err != nil {
+		if err := app.grpcServer.Serve(lis); err != nil {
 			log.Fatal().Err(err).Msg("failed to start grpc server")
 		}
 	},

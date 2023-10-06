@@ -7,6 +7,7 @@
 package server
 
 import (
+	"github.com/kolesnikovm/messenger/di"
 	"github.com/kolesnikovm/messenger/server/grpc"
 	"github.com/kolesnikovm/messenger/server/grpc/messenger"
 	"github.com/kolesnikovm/messenger/usecase/message"
@@ -18,10 +19,11 @@ func InitializeApplication() *application {
 	messageUseCase := message.New()
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := grpc.NewInterceptor()
-	serverBuilder := &grpc.ServerBuilder{
+	serverBuilder := grpc.ServerBuilder{
 		MessengerServer: handler,
 		Interceptor:     streamServerInterceptor,
 	}
-	serverApplication := newApplication(serverBuilder)
+	server := di.ProvideServer(serverBuilder)
+	serverApplication := newApplication(server)
 	return serverApplication
 }

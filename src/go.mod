@@ -3,6 +3,7 @@ module github.com/kolesnikovm/messenger
 go 1.21.1
 
 require (
+	github.com/google/wire v0.5.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/rs/zerolog v1.31.0
 	github.com/spf13/cobra v1.7.0

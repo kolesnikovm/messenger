@@ -6,8 +6,6 @@ import (
 
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/server/grpc"
-	"github.com/kolesnikovm/messenger/server/grpc/messenger"
-	messageUseCase "github.com/kolesnikovm/messenger/usecase/message"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -32,14 +30,7 @@ var Cmd = &cobra.Command{
 			log.Fatal().Err(err).Msgf("failed to listen port %d", config.ListenPort)
 		}
 
-		messageUseCase := messageUseCase.New()
-
-		serverBuilder := grpc.ServerBuilder{
-			MessengerServer: &messenger.Handler{
-				Usecase: messageUseCase,
-			},
-			Interceptor: grpc.NewInterceptor(),
-		}
+		serverBuilder := grpc.InitializeServerBuilder()
 		server := serverBuilder.Build()
 
 		log.Info().Msgf("Messenger server listening on %v", lis.Addr())

@@ -10,6 +10,12 @@ type Handler struct {
 	Usecase usecase.Message
 }
 
+func NewHandler(usecase usecase.Message) *Handler {
+	return &Handler{
+		Usecase: usecase,
+	}
+}
+
 func (s *Handler) transformMessageRPC(msg *pb.Message) entity.Message {
 	res := entity.Message{
 		Text: msg.Text,

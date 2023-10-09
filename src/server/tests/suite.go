@@ -12,9 +12,9 @@ import (
 )
 
 type Suite struct {
-	grpcServer *grpc.Server
-	grpcClient proto.MessengerClient
-	conn       *grpc.ClientConn
+	grpcServer             *grpc.Server
+	messengerServiceClient proto.MessengerClient
+	conn                   *grpc.ClientConn
 }
 
 func newSuite(grpcServer *grpc.Server) (*Suite, error) {
@@ -37,12 +37,12 @@ func newSuite(grpcServer *grpc.Server) (*Suite, error) {
 		return nil, err
 	}
 
-	grpcClient := proto.NewMessengerClient(conn)
+	messengerServiceClient := proto.NewMessengerClient(conn)
 
 	return &Suite{
-		grpcServer: grpcServer,
-		grpcClient: grpcClient,
-		conn:       conn,
+		grpcServer:             grpcServer,
+		messengerServiceClient: messengerServiceClient,
+		conn:                   conn,
 	}, nil
 }
 

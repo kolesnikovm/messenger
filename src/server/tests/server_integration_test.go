@@ -14,7 +14,7 @@ func TestSendMessage(t *testing.T) {
 	defer suite.Stop()
 
 	ctx := context.Background()
-	stream, err := suite.grpcClient.SendMessage(ctx)
+	stream, err := suite.messengerServiceClient.SendMessage(ctx)
 	require.NoErrorf(t, err, "Failed to create stream")
 
 	message := &proto.Message{Text: "test"}

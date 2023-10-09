@@ -8,11 +8,11 @@ import (
 	"github.com/kolesnikovm/messenger/di"
 )
 
-func InitializeSuite() *Suite {
+func InitializeSuite() (*Suite, error) {
 	wire.Build(
 		di.UsecaseSet,
 		di.ServerSet,
 		newSuite,
 	)
-	return &Suite{}
+	return &Suite{}, nil
 }

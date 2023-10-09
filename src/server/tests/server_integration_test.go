@@ -41,19 +41,13 @@ func TestSendMessage(t *testing.T) {
 
 	client := proto.NewMessengerClient(conn)
 	stream, err := client.SendMessage(ctx)
-	if err != nil {
-		t.Fatalf("Failed to create stream: %v", err)
-	}
+	require.NoErrorf(t, err, "Failed to create stream")
 
 	message := &proto.Message{Text: "test"}
-	if err := stream.Send(message); err != nil {
-		t.Fatalf("%v.Send(%v) = %v", stream, message, err)
-	}
+	require.NoErrorf(t, err, "Error in %v.Send(%v)", stream, message)
 
 	reply, err := stream.CloseAndRecv()
-	if err != nil {
-		t.Fatalf("%v.CloseAndRecv() got error %v", stream, err)
-	}
+	require.NoErrorf(t, err, "Error in %v.CloseAndRecv()", stream)
 
 	require.Equal(t, 0, int(reply.GetErrorCount()))
 }

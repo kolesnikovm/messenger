@@ -3,9 +3,10 @@ package tests
 import (
 	"context"
 	"net"
+	"testing"
 
 	"github.com/kolesnikovm/messenger/proto"
-	"github.com/rs/zerolog/log"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/test/bufconn"
@@ -15,15 +16,16 @@ type Suite struct {
 	grpcServer             *grpc.Server
 	messengerServiceClient proto.MessengerClient
 	conn                   *grpc.ClientConn
+	t                      *testing.T
 }
 
-func newSuite(grpcServer *grpc.Server) (*Suite, error) {
+func newSuite(t *testing.T, grpcServer *grpc.Server) (*Suite, error) {
 	const bufSize = 1024 * 1024
 	lis := bufconn.Listen(bufSize)
 
 	go func() {
 		if err := grpcServer.Serve(lis); err != nil {
-			log.Fatal().Err(err).Msg("server exited with error")
+			require.NoErrorf(t, err, "server exited with error")
 		}
 	}()
 
@@ -43,12 +45,13 @@ func newSuite(grpcServer *grpc.Server) (*Suite, error) {
 		grpcServer:             grpcServer,
 		messengerServiceClient: messengerServiceClient,
 		conn:                   conn,
+		t:                      t,
 	}, nil
 }
 
 func (s *Suite) Stop() {
-	if err := s.conn.Close(); err != nil {
-		log.Fatal().Err(err).Msg("failed to close grpc.ClientConn")
-	}
 	s.grpcServer.Stop()
+
+	err := s.conn.Close()
+	require.NoErrorf(s.t, err, "failed to close grpc.ClientConn")
 }

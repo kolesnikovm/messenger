@@ -11,11 +11,12 @@ import (
 	"github.com/kolesnikovm/messenger/server/grpc"
 	"github.com/kolesnikovm/messenger/server/grpc/messenger"
 	"github.com/kolesnikovm/messenger/usecase/message"
+	"testing"
 )
 
 // Injectors from wire.go:
 
-func InitializeSuite() (*Suite, error) {
+func InitializeSuite(t *testing.T) (*Suite, error) {
 	messageUseCase := message.New()
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := grpc.NewInterceptor()
@@ -24,7 +25,7 @@ func InitializeSuite() (*Suite, error) {
 		Interceptor:     streamServerInterceptor,
 	}
 	server := di.ProvideServer(serverBuilder)
-	suite, err := newSuite(server)
+	suite, err := newSuite(t, server)
 	if err != nil {
 		return nil, err
 	}

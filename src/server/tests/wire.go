@@ -4,11 +4,13 @@
 package tests
 
 import (
+	"testing"
+
 	"github.com/google/wire"
 	"github.com/kolesnikovm/messenger/di"
 )
 
-func InitializeSuite() (*Suite, error) {
+func InitializeSuite(t *testing.T) (*Suite, error) {
 	wire.Build(
 		di.UsecaseSet,
 		di.ServerSet,

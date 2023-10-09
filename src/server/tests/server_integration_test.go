@@ -9,7 +9,7 @@ import (
 )
 
 func TestSendMessage(t *testing.T) {
-	suite, err := InitializeSuite()
+	suite, err := InitializeSuite(t)
 	require.NoError(t, err)
 	defer suite.Stop()
 

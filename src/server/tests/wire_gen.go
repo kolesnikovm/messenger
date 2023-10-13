@@ -7,6 +7,7 @@
 package tests
 
 import (
+	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/di"
 	"github.com/kolesnikovm/messenger/server/grpc"
 	"github.com/kolesnikovm/messenger/server/grpc/messenger"
@@ -16,8 +17,9 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeSuite(t *testing.T) (*Suite, error) {
-	messageUseCase := message.New()
+func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, error) {
+	kafkaMessageSender := di.ProvideKafka(conf)
+	messageUseCase := message.New(kafkaMessageSender)
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := grpc.NewInterceptor()
 	serverBuilder := grpc.ServerBuilder{

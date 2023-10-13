@@ -1,7 +1,13 @@
 package message
 
-type MessageUseCase struct{}
+import "github.com/kolesnikovm/messenger/integration"
 
-func New() *MessageUseCase {
-	return &MessageUseCase{}
+type MessageUseCase struct {
+	messageSender integration.MessageSender
+}
+
+func New(messageSender integration.MessageSender) *MessageUseCase {
+	return &MessageUseCase{
+		messageSender: messageSender,
+	}
 }

@@ -21,6 +21,9 @@ func newViper() *viper.Viper {
 
 	vp.SetDefault("listen_port", "9101")
 
+	vp.SetDefault("kafka_config.broker_list", "localhost:9094")
+	vp.SetDefault("kafka_config.topic", "messages")
+
 	vp.SetDefault("server_address", "127.0.0.1:9101")
 
 	return vp
@@ -35,8 +38,14 @@ type Address struct {
 	Port int
 }
 
+type KafkaConfig struct {
+	BrokerList []string `mapstructure:"broker_list"`
+	Topic      string   `mapstructure:"topic"`
+}
+
 type ServerConfig struct {
-	ListenPort int `mapstructure:"listen_port"`
+	ListenPort  int         `mapstructure:"listen_port"`
+	KafkaConfig KafkaConfig `mapstructure:"kafka_config"`
 }
 
 type ClientConfig struct {
@@ -101,7 +110,11 @@ func newConf[V Config](cfgFile string, conf V) (V, error) {
 		return conf, err
 	}
 
-	if err := vp.Unmarshal(&conf, viper.DecodeHook(decodeHookFunc())); err != nil {
+	err = vp.Unmarshal(&conf, viper.DecodeHook(mapstructure.ComposeDecodeHookFunc(
+		mapstructure.StringToSliceHookFunc(","),
+		decodeHookFunc(),
+	)))
+	if err != nil {
 		return conf, err
 	}
 

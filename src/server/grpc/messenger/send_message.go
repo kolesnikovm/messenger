@@ -24,6 +24,7 @@ func (s *Handler) SendMessage(stream proto.Messenger_SendMessageServer) error {
 		err = s.Usecase.Send(m)
 		if err != nil {
 			errorCount++
+			return err
 		}
 	}
 }

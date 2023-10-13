@@ -29,7 +29,7 @@ var Cmd = &cobra.Command{
 			log.Fatal().Err(err).Msgf("failed to listen port %d", config.ListenPort)
 		}
 
-		app := InitializeApplication()
+		app := InitializeApplication(config)
 
 		log.Info().Msgf("Messenger server listening on %v", lis.Addr())
 		if err := app.grpcServer.Serve(lis); err != nil {

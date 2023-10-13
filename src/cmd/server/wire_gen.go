@@ -7,6 +7,7 @@
 package server
 
 import (
+	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/di"
 	"github.com/kolesnikovm/messenger/server/grpc"
 	"github.com/kolesnikovm/messenger/server/grpc/messenger"
@@ -15,8 +16,9 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeApplication() *application {
-	messageUseCase := message.New()
+func InitializeApplication(conf configs.ServerConfig) *application {
+	kafkaMessageSender := di.ProvideKafka(conf)
+	messageUseCase := message.New(kafkaMessageSender)
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := grpc.NewInterceptor()
 	serverBuilder := grpc.ServerBuilder{

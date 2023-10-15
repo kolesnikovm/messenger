@@ -18,7 +18,10 @@ import (
 // Injectors from wire.go:
 
 func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, error) {
-	messageSender := di.ProvideNotifier(conf)
+	messageSender, err := di.ProvideNotifier(conf)
+	if err != nil {
+		return nil, err
+	}
 	messageUseCase := message.New(messageSender)
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := grpc.NewInterceptor()

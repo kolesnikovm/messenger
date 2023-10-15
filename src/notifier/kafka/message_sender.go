@@ -1,9 +1,10 @@
 package kafka
 
 import (
+	"fmt"
+
 	"github.com/IBM/sarama"
 	"github.com/kolesnikovm/messenger/configs"
-	"github.com/rs/zerolog/log"
 )
 
 type KafkaMessageSender struct {
@@ -11,17 +12,19 @@ type KafkaMessageSender struct {
 	Config   configs.KafkaConfig
 }
 
-func New(conf configs.KafkaConfig) *KafkaMessageSender {
+func New(conf configs.KafkaConfig) (*KafkaMessageSender, error) {
+	const op = "KafkaMessageSender.New"
+
 	config := sarama.NewConfig()
 	config.Producer.Return.Successes = true
 
 	producer, err := sarama.NewSyncProducer(conf.BrokerList, config)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to start kafka producer")
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	return &KafkaMessageSender{
 		Producer: producer,
 		Config:   conf,
-	}
+	}, nil
 }

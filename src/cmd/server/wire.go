@@ -9,12 +9,12 @@ import (
 	"github.com/kolesnikovm/messenger/di"
 )
 
-func InitializeApplication(conf configs.ServerConfig) *application {
+func InitializeApplication(conf configs.ServerConfig) (*application, error) {
 	wire.Build(
 		di.UsecaseSet,
 		di.ServerSet,
 		di.ProvideNotifier,
 		newApplication,
 	)
-	return &application{}
+	return &application{}, nil
 }

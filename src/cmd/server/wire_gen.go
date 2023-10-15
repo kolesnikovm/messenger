@@ -16,8 +16,11 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeApplication(conf configs.ServerConfig) *application {
-	messageSender := di.ProvideNotifier(conf)
+func InitializeApplication(conf configs.ServerConfig) (*application, error) {
+	messageSender, err := di.ProvideNotifier(conf)
+	if err != nil {
+		return nil, err
+	}
 	messageUseCase := message.New(messageSender)
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := grpc.NewInterceptor()
@@ -27,5 +30,5 @@ func InitializeApplication(conf configs.ServerConfig) *application {
 	}
 	server := di.ProvideServer(serverBuilder)
 	serverApplication := newApplication(server)
-	return serverApplication
+	return serverApplication, nil
 }

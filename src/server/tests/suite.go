@@ -5,6 +5,7 @@ import (
 	"net"
 	"testing"
 
+	"github.com/kolesnikovm/messenger/notifier/mocks"
 	"github.com/kolesnikovm/messenger/proto"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -16,10 +17,11 @@ type Suite struct {
 	grpcServer             *grpc.Server
 	messengerServiceClient proto.MessengerClient
 	conn                   *grpc.ClientConn
+	messageSender          *mocks.MockMessageSender
 	t                      *testing.T
 }
 
-func newSuite(t *testing.T, grpcServer *grpc.Server) (*Suite, error) {
+func newSuite(t *testing.T, grpcServer *grpc.Server, messageSender *mocks.MockMessageSender) (*Suite, error) {
 	const bufSize = 1024 * 1024
 	lis := bufconn.Listen(bufSize)
 
@@ -45,6 +47,7 @@ func newSuite(t *testing.T, grpcServer *grpc.Server) (*Suite, error) {
 		grpcServer:             grpcServer,
 		messengerServiceClient: messengerServiceClient,
 		conn:                   conn,
+		messageSender:          messageSender,
 		t:                      t,
 	}, nil
 }

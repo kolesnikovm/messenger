@@ -1,12 +1,12 @@
 package message
 
-import "github.com/kolesnikovm/messenger/integration"
+import "github.com/kolesnikovm/messenger/notifier"
 
 type MessageUseCase struct {
-	messageSender integration.MessageSender
+	messageSender notifier.MessageSender
 }
 
-func New(messageSender integration.MessageSender) *MessageUseCase {
+func New(messageSender notifier.MessageSender) *MessageUseCase {
 	return &MessageUseCase{
 		messageSender: messageSender,
 	}

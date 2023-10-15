@@ -1,4 +1,4 @@
-package integration
+package notifier
 
 import "github.com/kolesnikovm/messenger/entity"
 

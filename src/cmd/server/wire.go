@@ -13,7 +13,7 @@ func InitializeApplication(conf configs.ServerConfig) *application {
 	wire.Build(
 		di.UsecaseSet,
 		di.ServerSet,
-		di.IntegrationSet,
+		di.NotifierSet,
 		newApplication,
 	)
 	return &application{}

@@ -21,7 +21,7 @@ func TestSendMessage(t *testing.T) {
 	stream, err := suite.messengerServiceClient.SendMessage(ctx)
 	require.NoErrorf(t, err, "Failed to create stream")
 
-	message := &proto.Message{Text: "test"}
+	message := &proto.Message{Text: "test", RecipientID: 1}
 	err = stream.Send(message)
 	require.NoErrorf(t, err, "Error in %v.Send(%v)", stream, message)
 

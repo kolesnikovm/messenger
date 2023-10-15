@@ -1,5 +1,6 @@
 package entity
 
 type Message struct {
-	Text string
+	Text        string
+	RecipientID uint64
 }

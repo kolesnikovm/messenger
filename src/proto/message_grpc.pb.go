@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.4
-// source: proto/message.proto
+// source: message.proto
 
 package proto
 
@@ -133,5 +133,5 @@ var Messenger_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "proto/message.proto",
+	Metadata: "message.proto",
 }

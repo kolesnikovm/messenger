@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 
@@ -24,7 +25,11 @@ func (k *KafkaMessageSender) Send(ctx context.Context, msg entity.Message) error
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
+	messageKey := make([]byte, 8)
+	binary.LittleEndian.PutUint64(messageKey, msg.RecipientID)
+
 	partition, offset, err := k.Producer.SendMessage(&sarama.ProducerMessage{
+		Key:   sarama.ByteEncoder(messageKey),
 		Topic: "messages",
 		Value: sarama.ByteEncoder(payload),
 	})

@@ -18,7 +18,8 @@ func NewHandler(usecase usecase.Message) *Handler {
 
 func (s *Handler) transformMessageRPC(msg *pb.Message) entity.Message {
 	res := entity.Message{
-		Text: msg.Text,
+		Text:        msg.Text,
+		RecipientID: msg.RecipientID,
 	}
 
 	return res

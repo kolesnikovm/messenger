@@ -8,6 +8,7 @@ service Messenger {
 
 message Message {
     string text = 1;
+    uint64 recipientID = 2;
 }
 
 message Status {

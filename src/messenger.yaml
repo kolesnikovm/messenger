@@ -1,5 +1,4 @@
 listen_port: "9102"
 kafka_config:
   broker_list: "localhost:9094"
-  topic: "messages"
 server_address: "127.0.0.1:9102"

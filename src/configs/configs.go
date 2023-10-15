@@ -22,7 +22,6 @@ func newViper() *viper.Viper {
 	vp.SetDefault("listen_port", "9101")
 
 	vp.SetDefault("kafka_config.broker_list", "localhost:9094")
-	vp.SetDefault("kafka_config.topic", "messages")
 
 	vp.SetDefault("server_address", "127.0.0.1:9101")
 
@@ -40,7 +39,6 @@ type Address struct {
 
 type KafkaConfig struct {
 	BrokerList []string `mapstructure:"broker_list"`
-	Topic      string   `mapstructure:"topic"`
 }
 
 type ServerConfig struct {

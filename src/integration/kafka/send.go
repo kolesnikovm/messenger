@@ -12,7 +12,7 @@ func (k *KafkaMessageSender) Send(msg entity.Message) error {
 	const op = "KafkaMessageSender.Send"
 
 	partition, offset, err := k.Producer.SendMessage(&sarama.ProducerMessage{
-		Topic: k.Config.Topic,
+		Topic: "messages",
 		Value: sarama.StringEncoder(msg.Text),
 	})
 

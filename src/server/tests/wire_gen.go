@@ -18,8 +18,8 @@ import (
 // Injectors from wire.go:
 
 func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, error) {
-	kafkaMessageSender := di.ProvideKafka(conf)
-	messageUseCase := message.New(kafkaMessageSender)
+	messageSender := di.ProvideNotifier(conf)
+	messageUseCase := message.New(messageSender)
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := grpc.NewInterceptor()
 	serverBuilder := grpc.ServerBuilder{

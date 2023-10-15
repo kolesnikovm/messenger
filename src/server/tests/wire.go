@@ -15,7 +15,7 @@ func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, error) {
 	wire.Build(
 		di.UsecaseSet,
 		di.ServerSet,
-		di.NotifierSet, // TODO replace with mock
+		di.ProvideNotifier, // TODO replace with mock
 		newSuite,
 	)
 	return &Suite{}, nil

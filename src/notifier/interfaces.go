@@ -1,7 +1,11 @@
 package notifier
 
-import "github.com/kolesnikovm/messenger/entity"
+import (
+	"context"
+
+	"github.com/kolesnikovm/messenger/entity"
+)
 
 type MessageSender interface {
-	Send(entity.Message) error
+	Send(context.Context, entity.Message) error
 }

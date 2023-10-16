@@ -9,6 +9,7 @@ import (
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/entity"
 	"github.com/kolesnikovm/messenger/proto"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,13 +21,13 @@ func TestSendMessage(t *testing.T) {
 	require.NoError(t, err)
 	defer suite.Stop()
 
-	ctx := context.Background()
 	entityMessage := entity.Message{
 		Text:        "test",
 		RecipientID: 1,
 	}
-	suite.messageSender.EXPECT().Send(ctx, entityMessage).Return(nil)
+	suite.messageSender.EXPECT().Send(mock.AnythingOfType("*context.valueCtx"), entityMessage).Return(nil)
 
+	ctx := context.Background()
 	stream, err := suite.messengerServiceClient.SendMessage(ctx)
 	require.NoErrorf(t, err, "Failed to create stream")
 
@@ -48,14 +49,14 @@ func TestSendMessageError(t *testing.T) {
 	require.NoError(t, err)
 	defer suite.Stop()
 
-	ctx := context.Background()
 	entityMessage := entity.Message{
 		Text:        "test",
 		RecipientID: 1,
 	}
 	notifierError := errors.New("notifier error")
-	suite.messageSender.EXPECT().Send(ctx, entityMessage).Return(notifierError)
+	suite.messageSender.EXPECT().Send(mock.AnythingOfType("*context.valueCtx"), entityMessage).Return(notifierError)
 
+	ctx := context.Background()
 	stream, err := suite.messengerServiceClient.SendMessage(ctx)
 	require.NoErrorf(t, err, "Failed to create stream")
 

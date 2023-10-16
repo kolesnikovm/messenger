@@ -1,9 +1,11 @@
 package usecase
 
 import (
+	"context"
+
 	"github.com/kolesnikovm/messenger/entity"
 )
 
 type Message interface {
-	Send(entity.Message) error
+	Send(context.Context, entity.Message) error
 }

@@ -15,6 +15,12 @@ type kafkaMessage struct {
 	Text string `json:"text"`
 }
 
+type result struct {
+	Partition int32
+	Offset    int64
+	Error     error
+}
+
 func (k *KafkaMessageSender) Send(ctx context.Context, msg entity.Message) error {
 	const op = "KafkaMessageSender.Send"
 
@@ -28,20 +34,37 @@ func (k *KafkaMessageSender) Send(ctx context.Context, msg entity.Message) error
 	messageKey := make([]byte, 8)
 	binary.LittleEndian.PutUint64(messageKey, msg.RecipientID)
 
-	partition, offset, err := k.Producer.SendMessage(&sarama.ProducerMessage{
-		Key:   sarama.ByteEncoder(messageKey),
-		Topic: "messages",
-		Value: sarama.ByteEncoder(payload),
-	})
+	resultCh := make(chan *result)
 
-	if err != nil {
-		return fmt.Errorf("%s: %w", op, err)
+	go func() {
+		defer close(resultCh)
+
+		partition, offset, err := k.Producer.SendMessage(&sarama.ProducerMessage{
+			Key:   sarama.ByteEncoder(messageKey),
+			Topic: "messages",
+			Value: sarama.ByteEncoder(payload),
+		})
+
+		resultCh <- &result{
+			Partition: partition,
+			Offset:    offset,
+			Error:     err,
+		}
+	}()
+
+	select {
+	case <-ctx.Done():
+		return fmt.Errorf("%s: %w", op, context.Cause(ctx))
+	case result := <-resultCh:
+		if result.Error != nil {
+			return fmt.Errorf("%s: %w", op, result.Error)
+		}
+		log.Debug().
+			Int32("partition", result.Partition).
+			Int64("offset", result.Offset).
+			Msg("message sent to kafa")
+		break
 	}
-
-	log.Debug().
-		Int32("partition", partition).
-		Int64("offset", offset).
-		Msg("message sent to kafa")
 
 	return nil
 }

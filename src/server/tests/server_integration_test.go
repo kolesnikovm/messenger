@@ -9,6 +9,7 @@ import (
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/entity"
 	"github.com/kolesnikovm/messenger/proto"
+	"github.com/oklog/ulid/v2"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -21,9 +22,12 @@ func TestSendMessage(t *testing.T) {
 	require.NoError(t, err)
 	defer suite.Stop()
 
+	messageID := ulid.Make()
 	entityMessage := entity.Message{
+		MessageID:   messageID,
+		SenderID:    1,
+		RecipientID: 2,
 		Text:        "test",
-		RecipientID: 1,
 	}
 	suite.messageSender.EXPECT().Send(mock.AnythingOfType("*context.valueCtx"), entityMessage).Return(nil)
 
@@ -31,7 +35,12 @@ func TestSendMessage(t *testing.T) {
 	stream, err := suite.messengerServiceClient.SendMessage(ctx)
 	require.NoErrorf(t, err, "Failed to create stream")
 
-	message := &proto.Message{Text: "test", RecipientID: 1}
+	message := &proto.Message{
+		MessageID:   messageID.Bytes(),
+		SenderID:    1,
+		RecipientID: 2,
+		Text:        "test",
+	}
 	err = stream.Send(message)
 	require.NoErrorf(t, err, "Error in %v.Send(%v)", stream, message)
 
@@ -49,9 +58,12 @@ func TestSendMessageError(t *testing.T) {
 	require.NoError(t, err)
 	defer suite.Stop()
 
+	messageID := ulid.Make()
 	entityMessage := entity.Message{
+		MessageID:   messageID,
+		SenderID:    1,
+		RecipientID: 2,
 		Text:        "test",
-		RecipientID: 1,
 	}
 	notifierError := errors.New("notifier error")
 	suite.messageSender.EXPECT().Send(mock.AnythingOfType("*context.valueCtx"), entityMessage).Return(notifierError)
@@ -60,7 +72,12 @@ func TestSendMessageError(t *testing.T) {
 	stream, err := suite.messengerServiceClient.SendMessage(ctx)
 	require.NoErrorf(t, err, "Failed to create stream")
 
-	message := &proto.Message{Text: "test", RecipientID: 1}
+	message := &proto.Message{
+		MessageID:   messageID.Bytes(),
+		SenderID:    1,
+		RecipientID: 2,
+		Text:        "test",
+	}
 	err = stream.Send(message)
 	require.NoErrorf(t, err, "Error in %v.Send(%v)", stream, message)
 

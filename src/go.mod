@@ -6,6 +6,7 @@ require (
 	github.com/IBM/sarama v1.41.2
 	github.com/google/wire v0.5.0
 	github.com/mitchellh/mapstructure v1.5.0
+	github.com/oklog/ulid/v2 v2.1.0
 	github.com/rs/zerolog v1.31.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0

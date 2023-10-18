@@ -19,7 +19,10 @@ func (s *Handler) SendMessage(stream proto.Messenger_SendMessageServer) error {
 			return err
 		}
 
-		m := s.transformMessageRPC(message)
+		m, err := s.transformMessageRPC(message)
+		if err != nil {
+			return err
+		}
 
 		err = s.Usecase.Send(stream.Context(), m)
 		if err != nil {

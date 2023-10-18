@@ -12,7 +12,10 @@ import (
 )
 
 type kafkaMessage struct {
-	Text string `json:"text"`
+	MessageID   string `json:"messageId"`
+	SenderID    uint64 `json:"senderId"`
+	RecipientID uint64 `json:"recipientId"`
+	Text        string `json:"text"`
 }
 
 type result struct {
@@ -25,7 +28,10 @@ func (k *KafkaMessageSender) Send(ctx context.Context, msg entity.Message) error
 	const op = "KafkaMessageSender.Send"
 
 	payload, err := json.Marshal(&kafkaMessage{
-		Text: msg.Text,
+		MessageID:   msg.MessageID.String(),
+		SenderID:    msg.SenderID,
+		RecipientID: msg.RecipientID,
+		Text:        msg.Text,
 	})
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)

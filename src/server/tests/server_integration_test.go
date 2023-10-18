@@ -3,7 +3,6 @@ package tests
 import (
 	"context"
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/kolesnikovm/messenger/configs"
@@ -82,5 +81,5 @@ func TestSendMessageError(t *testing.T) {
 	require.NoErrorf(t, err, "Error in %v.Send(%v)", stream, message)
 
 	_, err = stream.CloseAndRecv()
-	require.EqualError(t, err, fmt.Sprintf("rpc error: code = Unknown desc = %s", notifierError.Error()))
+	require.EqualError(t, err, "rpc error: code = Internal desc = Internal server error")
 }

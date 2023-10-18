@@ -12,6 +12,8 @@ type KafkaMessageSender struct {
 	Config   configs.KafkaConfig
 }
 
+const messageTopic = "messages"
+
 func New(conf configs.KafkaConfig) (*KafkaMessageSender, error) {
 	const op = "KafkaMessageSender.New"
 

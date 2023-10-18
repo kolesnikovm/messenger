@@ -47,7 +47,7 @@ func (k *KafkaMessageSender) Send(ctx context.Context, msg entity.Message) error
 
 		partition, offset, err := k.Producer.SendMessage(&sarama.ProducerMessage{
 			Key:   sarama.ByteEncoder(messageKey),
-			Topic: "messages",
+			Topic: messageTopic,
 			Value: sarama.ByteEncoder(payload),
 		})
 

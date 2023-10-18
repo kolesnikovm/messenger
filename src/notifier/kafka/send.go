@@ -69,7 +69,6 @@ func (k *KafkaMessageSender) Send(ctx context.Context, msg entity.Message) error
 			Int32("partition", result.Partition).
 			Int64("offset", result.Offset).
 			Msg("message sent to kafa")
-		break
 	}
 
 	return nil

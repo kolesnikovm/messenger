@@ -1,11 +1,15 @@
 package message
 
 import (
+	"context"
+
 	"github.com/kolesnikovm/messenger/entity"
-	"github.com/rs/zerolog/log"
 )
 
-func (uc *MessageUseCase) Send(message entity.Message) error {
-	log.Info().Msgf("new message: %s", message.Text)
+func (m *MessageUseCase) Send(ctx context.Context, message entity.Message) error {
+	if err := m.messageSender.Send(ctx, message); err != nil {
+		return err
+	}
+
 	return nil
 }

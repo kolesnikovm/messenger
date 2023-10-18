@@ -7,6 +7,7 @@
 package server
 
 import (
+	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/di"
 	"github.com/kolesnikovm/messenger/server/grpc"
 	"github.com/kolesnikovm/messenger/server/grpc/messenger"
@@ -15,8 +16,12 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeApplication() *application {
-	messageUseCase := message.New()
+func InitializeApplication(conf configs.ServerConfig) (*application, error) {
+	messageSender, err := di.ProvideNotifier(conf)
+	if err != nil {
+		return nil, err
+	}
+	messageUseCase := message.New(messageSender)
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := grpc.NewInterceptor()
 	serverBuilder := grpc.ServerBuilder{
@@ -25,5 +30,5 @@ func InitializeApplication() *application {
 	}
 	server := di.ProvideServer(serverBuilder)
 	serverApplication := newApplication(server)
-	return serverApplication
+	return serverApplication, nil
 }

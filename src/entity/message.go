@@ -1,5 +1,10 @@
 package entity
 
+import "github.com/oklog/ulid/v2"
+
 type Message struct {
-	Text string
+	MessageID   ulid.ULID
+	SenderID    uint64
+	RecipientID uint64
+	Text        string
 }

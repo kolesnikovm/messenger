@@ -7,7 +7,10 @@ service Messenger {
 }
 
 message Message {
-    string text = 1;
+    bytes  messageID = 1;
+    uint64 senderID = 2;
+    uint64 recipientID = 3;
+    string text = 4;
 }
 
 message Status {

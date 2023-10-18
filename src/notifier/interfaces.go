@@ -1,4 +1,4 @@
-package usecase
+package notifier
 
 import (
 	"context"
@@ -6,6 +6,6 @@ import (
 	"github.com/kolesnikovm/messenger/entity"
 )
 
-type Message interface {
+type MessageSender interface {
 	Send(context.Context, entity.Message) error
 }

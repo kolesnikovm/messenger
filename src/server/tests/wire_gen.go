@@ -7,7 +7,9 @@
 package tests
 
 import (
+	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/di"
+	"github.com/kolesnikovm/messenger/notifier/mocks"
 	"github.com/kolesnikovm/messenger/server/grpc"
 	"github.com/kolesnikovm/messenger/server/grpc/messenger"
 	"github.com/kolesnikovm/messenger/usecase/message"
@@ -16,8 +18,9 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeSuite(t *testing.T) (*Suite, error) {
-	messageUseCase := message.New()
+func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, error) {
+	mockMessageSender := mocks.ProvideNotifier(t)
+	messageUseCase := message.New(mockMessageSender)
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := grpc.NewInterceptor()
 	serverBuilder := grpc.ServerBuilder{
@@ -25,7 +28,7 @@ func InitializeSuite(t *testing.T) (*Suite, error) {
 		Interceptor:     streamServerInterceptor,
 	}
 	server := di.ProvideServer(serverBuilder)
-	suite, err := newSuite(t, server)
+	suite, err := newSuite(t, server, mockMessageSender)
 	if err != nil {
 		return nil, err
 	}

@@ -5,14 +5,16 @@ package server
 
 import (
 	"github.com/google/wire"
+	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/di"
 )
 
-func InitializeApplication() *application {
+func InitializeApplication(conf configs.ServerConfig) (*application, error) {
 	wire.Build(
 		di.UsecaseSet,
 		di.ServerSet,
+		di.ProvideNotifier,
 		newApplication,
 	)
-	return &application{}
+	return &application{}, nil
 }

@@ -1,20 +1,26 @@
 package grpc
 
 import (
+	"reflect"
+
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type MessengerServerStream struct {
 	grpc.ServerStream
 }
 
-func (s *MessengerServerStream) RecvMsg(m interface{}) error {
-	if err := s.ServerStream.RecvMsg(m); err != nil {
-		log.Error().Err(err).Msg("")
-		return err
-	}
-	return nil
+func (w *MessengerServerStream) RecvMsg(m any) error {
+	log.Debug().Str("message type", reflect.TypeOf(m).String()).Msg("message received")
+	return w.ServerStream.RecvMsg(m)
+}
+
+func (w *MessengerServerStream) SendMsg(m any) error {
+	log.Debug().Str("message type", reflect.TypeOf(m).String()).Msg("message sent")
+	return w.ServerStream.SendMsg(m)
 }
 
 func NewInterceptor() grpc.StreamServerInterceptor {
@@ -22,6 +28,16 @@ func NewInterceptor() grpc.StreamServerInterceptor {
 		wrapper := &MessengerServerStream{
 			ServerStream: ss,
 		}
-		return handler(srv, wrapper)
+
+		err := handler(srv, wrapper)
+		if err != nil {
+			st, _ := status.FromError(err)
+			log.Error().Err(st.Err()).Msg("")
+
+			if st.Code() == codes.Unknown {
+				return status.Error(codes.Internal, "Internal server error")
+			}
+		}
+		return err
 	}
 }

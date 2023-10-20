@@ -22,6 +22,52 @@ func (_m *MockMessageSender) EXPECT() *MockMessageSender_Expecter {
 	return &MockMessageSender_Expecter{mock: &_m.Mock}
 }
 
+// Get provides a mock function with given fields: _a0, _a1, _a2
+func (_m *MockMessageSender) Get(_a0 context.Context, _a1 uint64, _a2 int) <-chan *entity.Message {
+	ret := _m.Called(_a0, _a1, _a2)
+
+	var r0 <-chan *entity.Message
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, int) <-chan *entity.Message); ok {
+		r0 = rf(_a0, _a1, _a2)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(<-chan *entity.Message)
+		}
+	}
+
+	return r0
+}
+
+// MockMessageSender_Get_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Get'
+type MockMessageSender_Get_Call struct {
+	*mock.Call
+}
+
+// Get is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 uint64
+//   - _a2 int
+func (_e *MockMessageSender_Expecter) Get(_a0 interface{}, _a1 interface{}, _a2 interface{}) *MockMessageSender_Get_Call {
+	return &MockMessageSender_Get_Call{Call: _e.mock.On("Get", _a0, _a1, _a2)}
+}
+
+func (_c *MockMessageSender_Get_Call) Run(run func(_a0 context.Context, _a1 uint64, _a2 int)) *MockMessageSender_Get_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uint64), args[2].(int))
+	})
+	return _c
+}
+
+func (_c *MockMessageSender_Get_Call) Return(_a0 <-chan *entity.Message) *MockMessageSender_Get_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockMessageSender_Get_Call) RunAndReturn(run func(context.Context, uint64, int) <-chan *entity.Message) *MockMessageSender_Get_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Send provides a mock function with given fields: _a0, _a1
 func (_m *MockMessageSender) Send(_a0 context.Context, _a1 entity.Message) error {
 	ret := _m.Called(_a0, _a1)

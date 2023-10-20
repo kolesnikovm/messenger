@@ -11,13 +11,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type kafkaMessage struct {
-	MessageID   string `json:"messageId"`
-	SenderID    uint64 `json:"senderId"`
-	RecipientID uint64 `json:"recipientId"`
-	Text        string `json:"text"`
-}
-
 type result struct {
 	Partition int32
 	Offset    int64

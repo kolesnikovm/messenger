@@ -4,7 +4,7 @@ server:
 	cd src; LISTEN_PORT=${LISTEN_PORT} go run main.go server
 
 .PHONY: wire
-wire:
+wire: mockery
 	cd src/cmd/server; wire
 	cd src/server/tests; wire
 

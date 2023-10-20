@@ -8,4 +8,5 @@ import (
 
 type Message interface {
 	Send(context.Context, entity.Message) error
+	Get(context.Context, uint64, int) <-chan *entity.Message
 }

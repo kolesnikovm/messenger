@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MessengerClient interface {
 	SendMessage(ctx context.Context, opts ...grpc.CallOption) (Messenger_SendMessageClient, error)
+	GetMessage(ctx context.Context, in *MessaggeRequest, opts ...grpc.CallOption) (Messenger_GetMessageClient, error)
 }
 
 type messengerClient struct {
@@ -67,11 +68,44 @@ func (x *messengerSendMessageClient) CloseAndRecv() (*Status, error) {
 	return m, nil
 }
 
+func (c *messengerClient) GetMessage(ctx context.Context, in *MessaggeRequest, opts ...grpc.CallOption) (Messenger_GetMessageClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Messenger_ServiceDesc.Streams[1], "/Messenger/GetMessage", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &messengerGetMessageClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Messenger_GetMessageClient interface {
+	Recv() (*Message, error)
+	grpc.ClientStream
+}
+
+type messengerGetMessageClient struct {
+	grpc.ClientStream
+}
+
+func (x *messengerGetMessageClient) Recv() (*Message, error) {
+	m := new(Message)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // MessengerServer is the server API for Messenger service.
 // All implementations should embed UnimplementedMessengerServer
 // for forward compatibility
 type MessengerServer interface {
 	SendMessage(Messenger_SendMessageServer) error
+	GetMessage(*MessaggeRequest, Messenger_GetMessageServer) error
 }
 
 // UnimplementedMessengerServer should be embedded to have forward compatible implementations.
@@ -80,6 +114,9 @@ type UnimplementedMessengerServer struct {
 
 func (UnimplementedMessengerServer) SendMessage(Messenger_SendMessageServer) error {
 	return status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
+}
+func (UnimplementedMessengerServer) GetMessage(*MessaggeRequest, Messenger_GetMessageServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetMessage not implemented")
 }
 
 // UnsafeMessengerServer may be embedded to opt out of forward compatibility for this service.
@@ -119,6 +156,27 @@ func (x *messengerSendMessageServer) Recv() (*Message, error) {
 	return m, nil
 }
 
+func _Messenger_GetMessage_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(MessaggeRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(MessengerServer).GetMessage(m, &messengerGetMessageServer{stream})
+}
+
+type Messenger_GetMessageServer interface {
+	Send(*Message) error
+	grpc.ServerStream
+}
+
+type messengerGetMessageServer struct {
+	grpc.ServerStream
+}
+
+func (x *messengerGetMessageServer) Send(m *Message) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Messenger_ServiceDesc is the grpc.ServiceDesc for Messenger service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -131,6 +189,11 @@ var Messenger_ServiceDesc = grpc.ServiceDesc{
 			StreamName:    "SendMessage",
 			Handler:       _Messenger_SendMessage_Handler,
 			ClientStreams: true,
+		},
+		{
+			StreamName:    "GetMessage",
+			Handler:       _Messenger_GetMessage_Handler,
+			ServerStreams: true,
 		},
 	},
 	Metadata: "message.proto",

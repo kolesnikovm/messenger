@@ -4,6 +4,7 @@ option go_package = "github.com/kolesnikovm/messenger/proto";
 
 service Messenger {
     rpc SendMessage(stream Message) returns (Status) {}
+    rpc GetMessage(MessaggeRequest) returns (stream Message) {}
 }
 
 message Message {
@@ -16,3 +17,5 @@ message Message {
 message Status {
     int32 errorCount = 1;
 }
+
+message MessaggeRequest {}

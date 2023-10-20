@@ -11,6 +11,7 @@ import (
 	"github.com/oklog/ulid/v2"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/metadata"
 )
 
 func TestSendMessage(t *testing.T) {
@@ -102,9 +103,10 @@ func TestGetMessage(t *testing.T) {
 
 	messageCh := make(chan *entity.Message, 1)
 	messageCh <- entityMessage
-	suite.messageSender.EXPECT().Get(mock.AnythingOfType("*context.valueCtx"), 1, 1).Return(messageCh)
+	suite.messageSender.EXPECT().Get(mock.AnythingOfType("*context.valueCtx"), uint64(1), 1).Return(messageCh)
 
 	ctx := context.Background()
+	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1", "x-device-id", "1")
 	stream, err := suite.messengerServiceClient.GetMessage(ctx, &proto.MessaggeRequest{})
 	require.NoErrorf(t, err, "Failed to create stream")
 

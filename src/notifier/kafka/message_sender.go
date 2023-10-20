@@ -113,11 +113,16 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 					}
 
 					kafkaMessage := &kafkaMessage{}
-					json.Unmarshal(msg.Value, kafkaMessage)
+					err := json.Unmarshal(msg.Value, kafkaMessage)
+					if err != nil {
+						log.Error().Err(err).Msg("failed to unmarshal message")
+						return
+					}
 
 					messageID, err := ulid.Parse(kafkaMessage.MessageID)
 					if err != nil {
 						log.Error().Err(err).Msgf("failed to parse message id from: %s", kafkaMessage.MessageID)
+						return
 					}
 
 					entityMessage := &entity.Message{

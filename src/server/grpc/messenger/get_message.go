@@ -16,14 +16,14 @@ func (h *Handler) GetMessage(msgRequest *proto.MessaggeRequest, stream proto.Mes
 		return fmt.Errorf("%s: no metadata in request", op)
 	}
 
-	userID, err := strconv.Atoi(md.Get("x-user-id")[0])
+	userID, err := getHeader(md, "x-user-id")
 	if err != nil {
-		return fmt.Errorf("%s: failed to get user id from metadata: %v", op, md.Get("x-user-id"))
+		return err
 	}
 
-	deviceID, err := strconv.Atoi(md.Get("x-device-id")[0])
+	deviceID, err := getHeader(md, "x-device-id")
 	if err != nil {
-		return fmt.Errorf("%s: failed to get device id from metadata: %v", op, md.Get("x-device-id"))
+		return err
 	}
 
 	messageCh := h.Usecase.Get(stream.Context(), uint64(userID), deviceID)
@@ -42,4 +42,16 @@ func (h *Handler) GetMessage(msgRequest *proto.MessaggeRequest, stream proto.Mes
 	}
 
 	return nil
+}
+
+func getHeader(md metadata.MD, header string) (int, error) {
+	if len(md.Get(header)) > 0 {
+		id, err := strconv.Atoi(md.Get(header)[0])
+		if err != nil {
+			return 0, fmt.Errorf("failed to parse header %s: %v", header, md.Get("x-user-id"))
+		}
+		return id, nil
+	} else {
+		return 0, fmt.Errorf("no %s header in request", header)
+	}
 }

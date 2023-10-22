@@ -9,5 +9,5 @@ import (
 
 type MessageSender interface {
 	Send(context.Context, entity.Message) error
-	Get(ctx context.Context, recepientID string, sessionID ulid.ULID) (stream <-chan *entity.Message, cleanup func())
+	Get(ctx context.Context, recipientID string, sessionID ulid.ULID) (stream <-chan *entity.Message, cleanup func())
 }

@@ -5,18 +5,18 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
-func (s *StreamHub) CreateStream(recepientID string, sessionID ulid.ULID) <-chan *entity.Message {
+func (s *StreamHub) CreateStream(recipientID string, sessionID ulid.ULID) <-chan *entity.Message {
 	s.Lock()
 	defer s.Unlock()
 
 	var stream chan *entity.Message
 
-	userStreams, ok := s.Streams[recepientID]
+	userStreams, ok := s.Streams[recipientID]
 	if !ok {
 		// TODO add coonfig for message buffer size
 		stream = make(chan *entity.Message, 10)
 		userStreams = map[ulid.ULID](chan *entity.Message){sessionID: stream}
-		s.Streams[recepientID] = userStreams
+		s.Streams[recipientID] = userStreams
 	} else {
 		userStreams[sessionID] = stream
 	}

@@ -98,8 +98,8 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 						return
 					}
 
-					recepientID := string(msg.Key)
-					userStreams := k.StreamHub.GetStreams(recepientID)
+					recipientID := string(msg.Key)
+					userStreams := k.StreamHub.GetStreams(recipientID)
 					if len(userStreams) == 0 {
 						continue
 					}

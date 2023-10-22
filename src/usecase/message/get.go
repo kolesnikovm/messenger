@@ -10,7 +10,7 @@ import (
 )
 
 func (m *MessageUseCase) Get(ctx context.Context, userID string, sessionID ulid.ULID, chatID string) (<-chan *entity.Message, func(), error) {
-	var recepientID string
+	var recipientID string
 
 	if chatID != "" {
 		chatParticipants := strings.Split(chatID, ":")
@@ -18,13 +18,13 @@ func (m *MessageUseCase) Get(ctx context.Context, userID string, sessionID ulid.
 			return nil, nil, fmt.Errorf("failed to get chat participants from chat id: %s", chatID)
 		}
 		if chatParticipants[0] == userID || chatParticipants[1] == userID {
-			recepientID = chatID
+			recipientID = chatID
 		}
 	} else {
-		recepientID = userID
+		recipientID = userID
 	}
 
-	messageCh, cleanup := m.messageSender.Get(ctx, recepientID, sessionID)
+	messageCh, cleanup := m.messageSender.Get(ctx, recipientID, sessionID)
 
 	return messageCh, cleanup, nil
 }

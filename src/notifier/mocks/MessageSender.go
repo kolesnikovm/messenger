@@ -24,17 +24,17 @@ func (_m *MockMessageSender) EXPECT() *MockMessageSender_Expecter {
 	return &MockMessageSender_Expecter{mock: &_m.Mock}
 }
 
-// Get provides a mock function with given fields: ctx, recepientID, sessionID
-func (_m *MockMessageSender) Get(ctx context.Context, recepientID string, sessionID ulid.ULID) (<-chan *entity.Message, func()) {
-	ret := _m.Called(ctx, recepientID, sessionID)
+// Get provides a mock function with given fields: ctx, recipientID, sessionID
+func (_m *MockMessageSender) Get(ctx context.Context, recipientID string, sessionID ulid.ULID) (<-chan *entity.Message, func()) {
+	ret := _m.Called(ctx, recipientID, sessionID)
 
 	var r0 <-chan *entity.Message
 	var r1 func()
 	if rf, ok := ret.Get(0).(func(context.Context, string, ulid.ULID) (<-chan *entity.Message, func())); ok {
-		return rf(ctx, recepientID, sessionID)
+		return rf(ctx, recipientID, sessionID)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, string, ulid.ULID) <-chan *entity.Message); ok {
-		r0 = rf(ctx, recepientID, sessionID)
+		r0 = rf(ctx, recipientID, sessionID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(<-chan *entity.Message)
@@ -42,7 +42,7 @@ func (_m *MockMessageSender) Get(ctx context.Context, recepientID string, sessio
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, string, ulid.ULID) func()); ok {
-		r1 = rf(ctx, recepientID, sessionID)
+		r1 = rf(ctx, recipientID, sessionID)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(func())
@@ -59,13 +59,13 @@ type MockMessageSender_Get_Call struct {
 
 // Get is a helper method to define mock.On call
 //   - ctx context.Context
-//   - recepientID string
+//   - recipientID string
 //   - sessionID ulid.ULID
-func (_e *MockMessageSender_Expecter) Get(ctx interface{}, recepientID interface{}, sessionID interface{}) *MockMessageSender_Get_Call {
-	return &MockMessageSender_Get_Call{Call: _e.mock.On("Get", ctx, recepientID, sessionID)}
+func (_e *MockMessageSender_Expecter) Get(ctx interface{}, recipientID interface{}, sessionID interface{}) *MockMessageSender_Get_Call {
+	return &MockMessageSender_Get_Call{Call: _e.mock.On("Get", ctx, recipientID, sessionID)}
 }
 
-func (_c *MockMessageSender_Get_Call) Run(run func(ctx context.Context, recepientID string, sessionID ulid.ULID)) *MockMessageSender_Get_Call {
+func (_c *MockMessageSender_Get_Call) Run(run func(ctx context.Context, recipientID string, sessionID ulid.ULID)) *MockMessageSender_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(string), args[2].(ulid.ULID))
 	})

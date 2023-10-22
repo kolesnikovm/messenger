@@ -24,22 +24,26 @@ func (h *Handler) GetMessage(msgRequest *proto.MessaggeRequest, stream proto.Mes
 
 	sessionID := ulid.Make()
 
-	messageCh := h.Usecase.Get(stream.Context(), uint64(userID), sessionID)
+	messageCh, cleanup := h.Usecase.Get(stream.Context(), uint64(userID), sessionID)
 
-	for message := range messageCh {
-		protoMsg := &proto.Message{
-			MessageID:   message.MessageID.Bytes(),
-			SenderID:    message.SenderID,
-			RecipientID: message.RecipientID,
-			Text:        message.Text,
-		}
+	for {
+		select {
+		case message := <-messageCh:
+			protoMsg := &proto.Message{
+				MessageID:   message.MessageID.Bytes(),
+				SenderID:    message.SenderID,
+				RecipientID: message.RecipientID,
+				Text:        message.Text,
+			}
 
-		if err := stream.Send(protoMsg); err != nil {
-			return err
+			if err := stream.Send(protoMsg); err != nil {
+				return err
+			}
+		case <-stream.Context().Done():
+			cleanup()
+			return nil
 		}
 	}
-
-	return nil
 }
 
 func getHeader(md metadata.MD, header string) (int, error) {

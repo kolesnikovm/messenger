@@ -19,7 +19,7 @@ func TestGet(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	sessionID := ulid.Make()
-	readCh := kafkaMessageSender.Get(ctx, uint64(1), sessionID)
+	readCh, cleanup := kafkaMessageSender.Get(ctx, uint64(1), sessionID)
 
 	entityMessage := &entity.Message{
 		MessageID:   ulid.Make(),
@@ -49,6 +49,7 @@ func TestGet(t *testing.T) {
 		case msg := <-readCh:
 			require.Equal(t, entityMessage, msg)
 		case <-ctx.Done():
+			cleanup()
 			return
 		}
 	}

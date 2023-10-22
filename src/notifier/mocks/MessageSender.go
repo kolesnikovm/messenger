@@ -25,10 +25,14 @@ func (_m *MockMessageSender) EXPECT() *MockMessageSender_Expecter {
 }
 
 // Get provides a mock function with given fields: ctx, userID, sessionID
-func (_m *MockMessageSender) Get(ctx context.Context, userID uint64, sessionID ulid.ULID) <-chan *entity.Message {
+func (_m *MockMessageSender) Get(ctx context.Context, userID uint64, sessionID ulid.ULID) (<-chan *entity.Message, func()) {
 	ret := _m.Called(ctx, userID, sessionID)
 
 	var r0 <-chan *entity.Message
+	var r1 func()
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, ulid.ULID) (<-chan *entity.Message, func())); ok {
+		return rf(ctx, userID, sessionID)
+	}
 	if rf, ok := ret.Get(0).(func(context.Context, uint64, ulid.ULID) <-chan *entity.Message); ok {
 		r0 = rf(ctx, userID, sessionID)
 	} else {
@@ -37,7 +41,15 @@ func (_m *MockMessageSender) Get(ctx context.Context, userID uint64, sessionID u
 		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, uint64, ulid.ULID) func()); ok {
+		r1 = rf(ctx, userID, sessionID)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(func())
+		}
+	}
+
+	return r0, r1
 }
 
 // MockMessageSender_Get_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Get'
@@ -60,12 +72,12 @@ func (_c *MockMessageSender_Get_Call) Run(run func(ctx context.Context, userID u
 	return _c
 }
 
-func (_c *MockMessageSender_Get_Call) Return(_a0 <-chan *entity.Message) *MockMessageSender_Get_Call {
-	_c.Call.Return(_a0)
+func (_c *MockMessageSender_Get_Call) Return(stream <-chan *entity.Message, cleanup func()) *MockMessageSender_Get_Call {
+	_c.Call.Return(stream, cleanup)
 	return _c
 }
 
-func (_c *MockMessageSender_Get_Call) RunAndReturn(run func(context.Context, uint64, ulid.ULID) <-chan *entity.Message) *MockMessageSender_Get_Call {
+func (_c *MockMessageSender_Get_Call) RunAndReturn(run func(context.Context, uint64, ulid.ULID) (<-chan *entity.Message, func())) *MockMessageSender_Get_Call {
 	_c.Call.Return(run)
 	return _c
 }

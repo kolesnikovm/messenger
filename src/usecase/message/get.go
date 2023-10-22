@@ -7,8 +7,8 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
-func (m *MessageUseCase) Get(ctx context.Context, userID uint64, sessionID ulid.ULID) <-chan *entity.Message {
-	messageCh := m.messageSender.Get(ctx, userID, sessionID)
+func (m *MessageUseCase) Get(ctx context.Context, userID uint64, sessionID ulid.ULID) (<-chan *entity.Message, func()) {
+	messageCh, cleanup := m.messageSender.Get(ctx, userID, sessionID)
 
-	return messageCh
+	return messageCh, cleanup
 }

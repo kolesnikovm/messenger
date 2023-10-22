@@ -15,3 +15,9 @@ protoc:
 .PHONY: mockery
 mockery:
 	cd src; mockery
+
+.PHONY: test
+test:
+	cd src/configs; go test ./...
+	cd src/server/tests; go test ./...
+	cd src/notifier/kafka; go test -race ./...

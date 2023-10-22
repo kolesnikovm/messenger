@@ -4,32 +4,29 @@ import (
 	"context"
 
 	"github.com/kolesnikovm/messenger/entity"
+	"github.com/oklog/ulid/v2"
 )
 
-func (k *KafkaMessageSender) Get(ctx context.Context, userID uint64, deviceID int) <-chan *entity.Message {
+func (k *KafkaMessageSender) Get(ctx context.Context, userID uint64, sessionID ulid.ULID) <-chan *entity.Message {
 	var stream chan *entity.Message
 
-	userDeviceStreams, ok := k.UserStreams[userID]
+	userStreams, ok := k.Streams[userID]
 	if !ok {
 		// TODO add coonfig for message buffer size
 		stream = make(chan *entity.Message, 10)
-		userDeviceStreams = map[int](chan *entity.Message){deviceID: stream}
-		k.UserStreams[userID] = userDeviceStreams
+		userStreams = map[ulid.ULID](chan *entity.Message){sessionID: stream}
+		k.Streams[userID] = userStreams
 	} else {
-		stream, ok := userDeviceStreams[deviceID]
-		if !ok {
-			stream = make(chan *entity.Message, 10)
-		}
-		userDeviceStreams[deviceID] = stream
+		userStreams[sessionID] = stream
 	}
 
 	go func() {
 		<-ctx.Done()
 
-		delete(userDeviceStreams, deviceID)
+		delete(userStreams, sessionID)
 		// TODO use mutex
-		if len(userDeviceStreams) == 0 {
-			delete(k.UserStreams, userID)
+		if len(userStreams) == 0 {
+			delete(k.Streams, userID)
 		}
 		close(stream)
 	}()

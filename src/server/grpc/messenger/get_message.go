@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/kolesnikovm/messenger/proto"
+	"github.com/oklog/ulid/v2"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -21,12 +22,9 @@ func (h *Handler) GetMessage(msgRequest *proto.MessaggeRequest, stream proto.Mes
 		return err
 	}
 
-	deviceID, err := getHeader(md, "x-device-id")
-	if err != nil {
-		return err
-	}
+	sessionID := ulid.Make()
 
-	messageCh := h.Usecase.Get(stream.Context(), uint64(userID), deviceID)
+	messageCh := h.Usecase.Get(stream.Context(), uint64(userID), sessionID)
 
 	for message := range messageCh {
 		protoMsg := &proto.Message{
@@ -48,7 +46,7 @@ func getHeader(md metadata.MD, header string) (int, error) {
 	if len(md.Get(header)) > 0 {
 		id, err := strconv.Atoi(md.Get(header)[0])
 		if err != nil {
-			return 0, fmt.Errorf("failed to parse header %s: %v", header, md.Get("x-user-id"))
+			return 0, fmt.Errorf("failed to parse header %s: %v", header, md.Get(header))
 		}
 		return id, nil
 	} else {

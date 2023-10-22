@@ -17,7 +17,7 @@ type KafkaMessageSender struct {
 	Producer           sarama.SyncProducer
 	Consumer           sarama.Consumer
 	PartitionConsumers map[int32]sarama.PartitionConsumer
-	UserStreams        map[uint64]map[int](chan *entity.Message)
+	Streams            map[uint64]map[ulid.ULID](chan *entity.Message)
 	Config             configs.KafkaConfig
 }
 
@@ -61,13 +61,13 @@ func New(conf configs.KafkaConfig) (*KafkaMessageSender, error) {
 		partitionConsumers[partition] = partitionConsumer
 	}
 
-	userStreams := make(map[uint64]map[int](chan *entity.Message))
+	streams := make(map[uint64]map[ulid.ULID](chan *entity.Message))
 
 	kafkaMessageSender := &KafkaMessageSender{
 		Producer:           producer,
 		Consumer:           consumer,
 		PartitionConsumers: partitionConsumers,
-		UserStreams:        userStreams,
+		Streams:            streams,
 		Config:             conf,
 	}
 
@@ -85,8 +85,8 @@ func (k *KafkaMessageSender) Close() {
 	k.Consumer.Close()
 	k.Producer.Close()
 
-	for _, deviceStreams := range k.UserStreams {
-		for _, stream := range deviceStreams {
+	for _, userStreams := range k.Streams {
+		for _, stream := range userStreams {
 			_, open := <-stream
 			if open {
 				// TODO add mutex
@@ -107,7 +107,7 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 					}
 
 					recepientID := binary.LittleEndian.Uint64(msg.Key)
-					deviceStreams, ok := k.UserStreams[recepientID]
+					userStreams, ok := k.Streams[recepientID]
 					if !ok {
 						continue
 					}
@@ -132,7 +132,7 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 						Text:        kafkaMessage.Text,
 					}
 
-					for _, stream := range deviceStreams {
+					for _, stream := range userStreams {
 						stream <- entityMessage
 					}
 				case <-ctx.Done():

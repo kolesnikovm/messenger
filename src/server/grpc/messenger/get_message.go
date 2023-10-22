@@ -2,7 +2,6 @@ package messenger
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/kolesnikovm/messenger/proto"
 	"github.com/oklog/ulid/v2"
@@ -24,7 +23,10 @@ func (h *Handler) GetMessage(msgRequest *proto.MessaggeRequest, stream proto.Mes
 
 	sessionID := ulid.Make()
 
-	messageCh, cleanup := h.Usecase.Get(stream.Context(), uint64(userID), sessionID)
+	messageCh, cleanup, err := h.Usecase.Get(stream.Context(), userID, sessionID, msgRequest.GetChatID())
+	if err != nil {
+		return err
+	}
 
 	for {
 		select {
@@ -46,14 +48,10 @@ func (h *Handler) GetMessage(msgRequest *proto.MessaggeRequest, stream proto.Mes
 	}
 }
 
-func getHeader(md metadata.MD, header string) (int, error) {
+func getHeader(md metadata.MD, header string) (string, error) {
 	if len(md.Get(header)) > 0 {
-		id, err := strconv.Atoi(md.Get(header)[0])
-		if err != nil {
-			return 0, fmt.Errorf("failed to parse header %s: %v", header, md.Get(header))
-		}
-		return id, nil
+		return md.Get(header)[0], nil
 	} else {
-		return 0, fmt.Errorf("no %s header in request", header)
+		return "", fmt.Errorf("no %s header in request", header)
 	}
 }

@@ -9,11 +9,11 @@ import (
 
 type StreamHub struct {
 	sync.RWMutex
-	Streams map[uint64]map[ulid.ULID](chan *entity.Message)
+	Streams map[string]map[ulid.ULID](chan *entity.Message)
 }
 
 func New() *StreamHub {
 	return &StreamHub{
-		Streams: make(map[uint64]map[ulid.ULID](chan *entity.Message)),
+		Streams: make(map[string]map[ulid.ULID](chan *entity.Message)),
 	}
 }

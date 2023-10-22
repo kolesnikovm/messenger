@@ -4,12 +4,12 @@ import (
 	"github.com/kolesnikovm/messenger/entity"
 )
 
-func (s *StreamHub) GetStreams(userID uint64) [](chan *entity.Message) {
+func (s *StreamHub) GetStreams(recepientID string) [](chan *entity.Message) {
 	s.RLock()
 	defer s.RUnlock()
 
 	var userStreams [](chan *entity.Message)
-	for _, stream := range s.Streams[userID] {
+	for _, stream := range s.Streams[recepientID] {
 		userStreams = append(userStreams, stream)
 	}
 

@@ -19,7 +19,7 @@ func TestGet(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	sessionID := ulid.Make()
-	readCh, cleanup := kafkaMessageSender.Get(ctx, uint64(1), sessionID)
+	readCh, cleanup := kafkaMessageSender.Get(ctx, "1", sessionID)
 
 	entityMessage := &entity.Message{
 		MessageID:   ulid.Make(),
@@ -29,7 +29,7 @@ func TestGet(t *testing.T) {
 	}
 
 	go func() {
-		userStreams := kafkaMessageSender.StreamHub.GetStreams(uint64(1))
+		userStreams := kafkaMessageSender.StreamHub.GetStreams("1")
 		require.Equal(t, 1, len(userStreams))
 
 		for _, stream := range userStreams {

@@ -103,11 +103,43 @@ func TestGetMessage(t *testing.T) {
 
 	messageCh := make(chan *entity.Message, 1)
 	messageCh <- entityMessage
-	suite.messageSender.EXPECT().Get(mock.AnythingOfType("*context.valueCtx"), uint64(1), mock.AnythingOfType("ulid.ULID")).Return(messageCh, func() {})
+	suite.messageSender.EXPECT().Get(mock.AnythingOfType("*context.valueCtx"), "1", mock.AnythingOfType("ulid.ULID")).Return(messageCh, func() {})
 
 	ctx := context.Background()
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1")
 	stream, err := suite.messengerServiceClient.GetMessage(ctx, &proto.MessaggeRequest{})
+	require.NoErrorf(t, err, "Failed to create stream")
+
+	message, err := stream.Recv()
+	require.NoErrorf(t, err, "Error in %v.Send(%v)", stream, message)
+
+	require.Equal(t, message.MessageID, messageID.Bytes())
+}
+
+func TestGetMessageP2P(t *testing.T) {
+	config, err := configs.NewServerConfig("")
+	require.NoError(t, err)
+
+	suite, err := InitializeSuite(t, config)
+	require.NoError(t, err)
+	defer suite.Stop()
+
+	messageID := ulid.Make()
+	entityMessage := &entity.Message{
+		MessageID:   messageID,
+		SenderID:    1,
+		RecipientID: 2,
+		Text:        "test",
+	}
+
+	messageCh := make(chan *entity.Message, 1)
+	messageCh <- entityMessage
+	suite.messageSender.EXPECT().Get(mock.AnythingOfType("*context.valueCtx"), "1:2", mock.AnythingOfType("ulid.ULID")).Return(messageCh, func() {})
+
+	ctx := context.Background()
+	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1")
+	chatID := "1:2"
+	stream, err := suite.messengerServiceClient.GetMessage(ctx, &proto.MessaggeRequest{ChatID: &chatID})
 	require.NoErrorf(t, err, "Failed to create stream")
 
 	message, err := stream.Recv()

@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"context"
-	"encoding/binary"
 	"encoding/json"
 	"fmt"
 
@@ -99,7 +98,7 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 						return
 					}
 
-					recepientID := binary.LittleEndian.Uint64(msg.Key)
+					recepientID := string(msg.Key)
 					userStreams := k.StreamHub.GetStreams(recepientID)
 					if len(userStreams) == 0 {
 						continue

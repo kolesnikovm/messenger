@@ -88,12 +88,14 @@ func (k *KafkaMessageSender) Close() {
 }
 
 func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
-	for _, partitionConsumer := range k.PartitionConsumers {
-		go func(partitionConsumer sarama.PartitionConsumer) {
+	for partition, partitionConsumer := range k.PartitionConsumers {
+		go func(partitionConsumer sarama.PartitionConsumer, partition int32) {
 			for {
 				select {
 				case msg, ok := <-partitionConsumer.Messages():
 					if !ok {
+						log.Error().Int32("partition", partition).Msg("partition consumer channel closed")
+						partitionConsumer.AsyncClose()
 						return
 					}
 
@@ -131,6 +133,6 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 				}
 			}
 
-		}(partitionConsumer)
+		}(partitionConsumer, partition)
 	}
 }

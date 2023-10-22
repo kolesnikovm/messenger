@@ -9,6 +9,7 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/entity"
+	"github.com/kolesnikovm/messenger/notifier/hub"
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -17,7 +18,7 @@ type KafkaMessageSender struct {
 	Producer           sarama.SyncProducer
 	Consumer           sarama.Consumer
 	PartitionConsumers map[int32]sarama.PartitionConsumer
-	Streams            map[uint64]map[ulid.ULID](chan *entity.Message)
+	StreamHub          *hub.StreamHub
 	Config             configs.KafkaConfig
 }
 
@@ -61,13 +62,13 @@ func New(conf configs.KafkaConfig) (*KafkaMessageSender, error) {
 		partitionConsumers[partition] = partitionConsumer
 	}
 
-	streams := make(map[uint64]map[ulid.ULID](chan *entity.Message))
+	streamHub := hub.New()
 
 	kafkaMessageSender := &KafkaMessageSender{
 		Producer:           producer,
 		Consumer:           consumer,
 		PartitionConsumers: partitionConsumers,
-		Streams:            streams,
+		StreamHub:          streamHub,
 		Config:             conf,
 	}
 
@@ -84,16 +85,6 @@ func (k *KafkaMessageSender) Close() {
 
 	k.Consumer.Close()
 	k.Producer.Close()
-
-	for _, userStreams := range k.Streams {
-		for _, stream := range userStreams {
-			_, open := <-stream
-			if open {
-				// TODO add mutex
-				close(stream)
-			}
-		}
-	}
 }
 
 func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
@@ -107,8 +98,8 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 					}
 
 					recepientID := binary.LittleEndian.Uint64(msg.Key)
-					userStreams, ok := k.Streams[recepientID]
-					if !ok {
+					userStreams := k.StreamHub.GetStreams(recepientID)
+					if len(userStreams) == 0 {
 						continue
 					}
 

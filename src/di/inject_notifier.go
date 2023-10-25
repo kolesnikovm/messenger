@@ -6,6 +6,12 @@ import (
 	"github.com/kolesnikovm/messenger/notifier/kafka"
 )
 
-func ProvideNotifier(conf configs.ServerConfig) (notifier.MessageSender, error) {
-	return kafka.New(conf.KafkaConfig)
+func ProvideNotifier(conf configs.ServerConfig) (notifier.MessageSender, func(), error) {
+	messageSender, err := kafka.New(conf.KafkaConfig)
+
+	cleanup := func() {
+		messageSender.Close()
+	}
+
+	return messageSender, cleanup, err
 }

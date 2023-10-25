@@ -16,10 +16,10 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeApplication(conf configs.ServerConfig) (*application, error) {
-	messageSender, err := di.ProvideNotifier(conf)
+func InitializeApplication(conf configs.ServerConfig) (*application, func(), error) {
+	messageSender, cleanup, err := di.ProvideNotifier(conf)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	messageUseCase := message.New(messageSender)
 	handler := messenger.NewHandler(messageUseCase)
@@ -30,5 +30,7 @@ func InitializeApplication(conf configs.ServerConfig) (*application, error) {
 	}
 	server := di.ProvideServer(serverBuilder)
 	serverApplication := newApplication(server)
-	return serverApplication, nil
+	return serverApplication, func() {
+		cleanup()
+	}, nil
 }

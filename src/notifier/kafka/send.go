@@ -2,21 +2,16 @@ package kafka
 
 import (
 	"context"
-	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/IBM/sarama"
 	"github.com/kolesnikovm/messenger/entity"
 	"github.com/rs/zerolog/log"
 )
-
-type kafkaMessage struct {
-	MessageID   string `json:"messageId"`
-	SenderID    uint64 `json:"senderId"`
-	RecipientID uint64 `json:"recipientId"`
-	Text        string `json:"text"`
-}
 
 type result struct {
 	Partition int32
@@ -28,7 +23,7 @@ func (k *KafkaMessageSender) Send(ctx context.Context, msg entity.Message) error
 	const op = "KafkaMessageSender.Send"
 
 	payload, err := json.Marshal(&kafkaMessage{
-		MessageID:   msg.MessageID.String(),
+		MessageID:   msg.MessageID,
 		SenderID:    msg.SenderID,
 		RecipientID: msg.RecipientID,
 		Text:        msg.Text,
@@ -37,8 +32,7 @@ func (k *KafkaMessageSender) Send(ctx context.Context, msg entity.Message) error
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
-	messageKey := make([]byte, 8)
-	binary.LittleEndian.PutUint64(messageKey, msg.RecipientID)
+	messageKey := composeKey(msg.SenderID, msg.RecipientID)
 
 	resultCh := make(chan *result)
 
@@ -72,4 +66,16 @@ func (k *KafkaMessageSender) Send(ctx context.Context, msg entity.Message) error
 	}
 
 	return nil
+}
+
+func composeKey(id1, id2 uint64) string {
+	slice := []uint64{id1, id2}
+	sort.SliceStable(slice, func(i, j int) bool { return slice[i] < slice[j] })
+
+	var stringSlice []string
+	for _, id := range slice {
+		stringSlice = append(stringSlice, strconv.Itoa(int(id)))
+	}
+
+	return strings.Join(stringSlice, ":")
 }

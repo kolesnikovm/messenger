@@ -42,7 +42,7 @@ func (h *Handler) GetMessage(msgRequest *proto.MessaggeRequest, stream proto.Mes
 				return err
 			}
 		case <-stream.Context().Done():
-			cleanup()
+			defer cleanup()
 			return nil
 		}
 	}

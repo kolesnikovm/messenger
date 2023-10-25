@@ -25,6 +25,7 @@ func (h *Handler) GetMessage(msgRequest *proto.MessaggeRequest, stream proto.Mes
 	sessionID := ulid.Make()
 
 	messageCh, cleanup := h.Usecase.Get(stream.Context(), userID, sessionID)
+	defer cleanup()
 
 	for {
 		select {
@@ -40,7 +41,6 @@ func (h *Handler) GetMessage(msgRequest *proto.MessaggeRequest, stream proto.Mes
 				return err
 			}
 		case <-stream.Context().Done():
-			defer cleanup()
 			return nil
 		}
 	}

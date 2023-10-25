@@ -6,8 +6,8 @@ import (
 )
 
 func (s *StreamHub) CreateStream(recipientID string, sessionID ulid.ULID) <-chan *entity.Message {
-	s.Lock()
-	defer s.Unlock()
+	s.mx.Lock()
+	defer s.mx.Unlock()
 
 	var stream chan *entity.Message
 

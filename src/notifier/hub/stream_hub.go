@@ -8,7 +8,7 @@ import (
 )
 
 type StreamHub struct {
-	sync.RWMutex
+	mx      sync.RWMutex
 	Streams map[string]map[ulid.ULID](chan *entity.Message)
 }
 

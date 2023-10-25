@@ -5,8 +5,8 @@ import (
 )
 
 func (s *StreamHub) DeleteStream(recipientID string, sessionID ulid.ULID) {
-	s.Lock()
-	defer s.Unlock()
+	s.mx.Lock()
+	defer s.mx.Unlock()
 
 	userStreams, ok := s.Streams[recipientID]
 	if !ok {

@@ -9,12 +9,11 @@ func (s *StreamHub) CreateStream(userID uint64, sessionID ulid.ULID) <-chan *ent
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
-	var stream chan *entity.Message
+	// TODO add coonfig for message buffer size
+	stream := make(chan *entity.Message, 10)
 
 	userStreams, ok := s.Streams[userID]
 	if !ok {
-		// TODO add coonfig for message buffer size
-		stream = make(chan *entity.Message, 10)
 		userStreams = map[ulid.ULID](chan *entity.Message){sessionID: stream}
 		s.Streams[userID] = userStreams
 	} else {

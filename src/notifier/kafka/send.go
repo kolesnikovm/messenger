@@ -23,7 +23,7 @@ func (k *KafkaMessageSender) Send(ctx context.Context, msg entity.Message) error
 	const op = "KafkaMessageSender.Send"
 
 	payload, err := json.Marshal(&kafkaMessage{
-		MessageID:   msg.MessageID.String(),
+		MessageID:   msg.MessageID,
 		SenderID:    msg.SenderID,
 		RecipientID: msg.RecipientID,
 		Text:        msg.Text,

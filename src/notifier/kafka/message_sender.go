@@ -24,10 +24,10 @@ type KafkaMessageSender struct {
 }
 
 type kafkaMessage struct {
-	MessageID   string `json:"messageId"`
-	SenderID    uint64 `json:"senderId"`
-	RecipientID uint64 `json:"recipientId"`
-	Text        string `json:"text"`
+	MessageID   ulid.ULID `json:"messageId"`
+	SenderID    uint64    `json:"senderId"`
+	RecipientID uint64    `json:"recipientId"`
+	Text        string    `json:"text"`
 }
 
 const messageTopic = "messages"
@@ -129,14 +129,8 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 						return
 					}
 
-					messageID, err := ulid.Parse(kafkaMessage.MessageID)
-					if err != nil {
-						log.Error().Err(err).Msgf("failed to parse message id from: %s", kafkaMessage.MessageID)
-						return
-					}
-
 					entityMessage := &entity.Message{
-						MessageID:   messageID,
+						MessageID:   kafkaMessage.MessageID,
 						SenderID:    kafkaMessage.SenderID,
 						RecipientID: kafkaMessage.RecipientID,
 						Text:        kafkaMessage.Text,

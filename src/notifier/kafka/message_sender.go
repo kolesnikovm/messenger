@@ -128,6 +128,7 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 						stream <- entityMessage
 					}
 				case <-ctx.Done():
+					partitionConsumer.AsyncClose()
 					return
 				}
 			}

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/IBM/sarama"
 	"github.com/kolesnikovm/messenger/configs"
@@ -98,9 +100,25 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 						return
 					}
 
-					recipientID := string(msg.Key)
-					userStreams := k.StreamHub.GetStreams(recipientID)
-					if len(userStreams) == 0 {
+					recipientIDs := strings.Split(string(msg.Key), ":")
+
+					var streams [][]chan *entity.Message
+
+					for _, recipientID := range recipientIDs {
+						userID, err := strconv.ParseUint(recipientID, 10, 64)
+						if err != nil {
+							log.Error().Msgf("failed to parse user id from %s", recipientID)
+							continue
+						}
+
+						userStreams := k.StreamHub.GetStreams(userID)
+						if len(userStreams) == 0 {
+							continue
+						}
+
+						streams = append(streams, userStreams)
+					}
+					if len(streams) == 0 {
 						continue
 					}
 
@@ -124,8 +142,10 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 						Text:        kafkaMessage.Text,
 					}
 
-					for _, stream := range userStreams {
-						stream <- entityMessage
+					for _, userStreams := range streams {
+						for _, stream := range userStreams {
+							stream <- entityMessage
+						}
 					}
 				case <-ctx.Done():
 					partitionConsumer.AsyncClose()

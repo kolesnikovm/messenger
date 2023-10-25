@@ -18,6 +18,4 @@ message Status {
     int32 errorCount = 1;
 }
 
-message MessaggeRequest {
-    optional string chatID = 1;
-}
+message MessaggeRequest {}

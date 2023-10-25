@@ -7,11 +7,11 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
-func (k *KafkaMessageSender) Get(ctx context.Context, recipientID string, sessionID ulid.ULID) (<-chan *entity.Message, func()) {
-	stream := k.StreamHub.CreateStream(recipientID, sessionID)
+func (k *KafkaMessageSender) Get(ctx context.Context, userID uint64, sessionID ulid.ULID) (<-chan *entity.Message, func()) {
+	stream := k.StreamHub.CreateStream(userID, sessionID)
 
 	cleanup := func() {
-		k.StreamHub.DeleteStream(recipientID, sessionID)
+		k.StreamHub.DeleteStream(userID, sessionID)
 	}
 
 	return stream, cleanup

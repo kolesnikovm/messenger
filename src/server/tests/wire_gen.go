@@ -12,6 +12,7 @@ import (
 	"github.com/kolesnikovm/messenger/notifier/mocks"
 	"github.com/kolesnikovm/messenger/server/grpc"
 	"github.com/kolesnikovm/messenger/server/grpc/messenger"
+	mocks2 "github.com/kolesnikovm/messenger/store/mocks"
 	"github.com/kolesnikovm/messenger/usecase/message"
 	"testing"
 )
@@ -20,7 +21,8 @@ import (
 
 func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, error) {
 	mockMessageSender := mocks.ProvideNotifier(t)
-	messageUseCase := message.New(mockMessageSender)
+	mockMessages := mocks2.ProvideStore(t)
+	messageUseCase := message.New(mockMessageSender, mockMessages)
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := grpc.NewInterceptor()
 	serverBuilder := grpc.ServerBuilder{
@@ -28,7 +30,7 @@ func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, error) {
 		Interceptor:     streamServerInterceptor,
 	}
 	server := di.ProvideServer(serverBuilder)
-	suite, err := newSuite(t, server, mockMessageSender)
+	suite, err := newSuite(t, server, mockMessageSender, mockMessages)
 	if err != nil {
 		return nil, err
 	}

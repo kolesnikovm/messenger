@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
@@ -23,6 +24,10 @@ func newViper() *viper.Viper {
 
 	vp.SetDefault("kafka_config.broker_list", "localhost:9094")
 
+	vp.SetDefault("postgres.url", "postgres://postgres:postgres@localhost:5432/messenger")
+	vp.SetDefault("postgres.max_connections", 10)
+	vp.SetDefault("postgres.max_connection_lifetime", 10*time.Minute)
+
 	vp.SetDefault("server_address", "127.0.0.1:9101")
 
 	return vp
@@ -37,6 +42,12 @@ type Address struct {
 	Port int
 }
 
+type Postgres struct {
+	URL             string        `mapstructure:"url"`
+	MaxConns        int32         `mapstructure:"max_connections"`
+	MaxConnLifetime time.Duration `mapstructure:"max_connection_lifetime"`
+}
+
 type KafkaConfig struct {
 	BrokerList []string `mapstructure:"broker_list"`
 }
@@ -44,6 +55,7 @@ type KafkaConfig struct {
 type ServerConfig struct {
 	ListenPort  int         `mapstructure:"listen_port"`
 	KafkaConfig KafkaConfig `mapstructure:"kafka_config"`
+	Postgres    Postgres    `mapstructure:"postgres"`
 }
 
 type ClientConfig struct {

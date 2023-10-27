@@ -7,6 +7,7 @@
 package server
 
 import (
+	"context"
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/di"
 	"github.com/kolesnikovm/messenger/server/grpc"
@@ -16,12 +17,17 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeApplication(conf configs.ServerConfig) (*application, func(), error) {
+func InitializeApplication(ctx context.Context, conf configs.ServerConfig) (*application, func(), error) {
 	messageSender, cleanup, err := di.ProvideNotifier(conf)
 	if err != nil {
 		return nil, nil, err
 	}
-	messageUseCase := message.New(messageSender)
+	messages, cleanup2, err := di.ProvideStore(ctx, conf)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	messageUseCase := message.New(messageSender, messages)
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := grpc.NewInterceptor()
 	serverBuilder := grpc.ServerBuilder{
@@ -31,6 +37,7 @@ func InitializeApplication(conf configs.ServerConfig) (*application, func(), err
 	server := di.ProvideServer(serverBuilder)
 	serverApplication := newApplication(server)
 	return serverApplication, func() {
+		cleanup2()
 		cleanup()
 	}, nil
 }

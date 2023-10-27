@@ -9,14 +9,16 @@ import (
 	"github.com/google/wire"
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/di"
-	"github.com/kolesnikovm/messenger/notifier/mocks"
+	notifier "github.com/kolesnikovm/messenger/notifier/mocks"
+	store "github.com/kolesnikovm/messenger/store/mocks"
 )
 
 func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, error) {
 	wire.Build(
 		di.UsecaseSet,
 		di.ServerSet,
-		mocks.NotifierSet,
+		notifier.NotifierSet,
+		store.StoreSet,
 		newSuite,
 	)
 	return &Suite{}, nil

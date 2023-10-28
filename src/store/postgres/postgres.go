@@ -8,11 +8,11 @@ import (
 	"github.com/kolesnikovm/messenger/configs"
 )
 
-type Messages struct {
-	db *pgxpool.Pool
+type DB struct {
+	*pgxpool.Pool
 }
 
-func New(ctx context.Context, conf configs.Postgres) (*Messages, error) {
+func New(ctx context.Context, conf configs.Postgres) (*DB, error) {
 	const op = "postgres.New"
 
 	pgxConf, err := pgxpool.ParseConfig(conf.URL)
@@ -34,11 +34,7 @@ func New(ctx context.Context, conf configs.Postgres) (*Messages, error) {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return &Messages{
-		db: pool,
+	return &DB{
+		pool,
 	}, nil
-}
-
-func (m *Messages) Close() {
-	m.db.Close()
 }

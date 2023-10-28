@@ -3,17 +3,25 @@ package di
 import (
 	"context"
 
+	"github.com/google/wire"
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/store"
 	"github.com/kolesnikovm/messenger/store/postgres"
+	"github.com/kolesnikovm/messenger/store/postgres/messages"
 )
 
-func ProvideStore(ctx context.Context, conf configs.ServerConfig) (store.Messages, func(), error) {
-	messageStore, err := postgres.New(ctx, conf.Postgres)
+func ProvideDB(ctx context.Context, conf configs.ServerConfig) (*postgres.DB, func(), error) {
+	db, err := postgres.New(ctx, conf.Postgres)
 
 	cleanup := func() {
-		messageStore.Close()
+		db.Close()
 	}
 
-	return messageStore, cleanup, err
+	return db, cleanup, err
 }
+
+var StoreSet = wire.NewSet(
+	ProvideDB,
+	messages.New,
+	wire.Bind(new(store.Messages), new(*messages.Messages)),
+)

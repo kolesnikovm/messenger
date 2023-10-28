@@ -23,7 +23,7 @@ type Suite struct {
 	t                      *testing.T
 }
 
-func newSuite(t *testing.T, grpcServer *grpc.Server, messageSender *notifier.MockMessageSender, messageStore *store.MockMessages) (*Suite, error) {
+func newConnection(t *testing.T, grpcServer *grpc.Server) (*grpc.ClientConn, error) {
 	const bufSize = 1024 * 1024
 	lis := bufconn.Listen(bufSize)
 
@@ -43,16 +43,11 @@ func newSuite(t *testing.T, grpcServer *grpc.Server, messageSender *notifier.Moc
 		return nil, err
 	}
 
-	messengerServiceClient := proto.NewMessengerClient(conn)
+	return conn, nil
+}
 
-	return &Suite{
-		grpcServer:             grpcServer,
-		messengerServiceClient: messengerServiceClient,
-		conn:                   conn,
-		messageSender:          messageSender,
-		messageStore:           messageStore,
-		t:                      t,
-	}, nil
+func newClient(conn *grpc.ClientConn) proto.MessengerClient {
+	return proto.NewMessengerClient(conn)
 }
 
 func (s *Suite) Stop() {

@@ -19,7 +19,9 @@ func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, error) {
 		di.ServerSet,
 		notifier.NotifierSet,
 		store.StoreSet,
-		newSuite,
+		newConnection,
+		newClient,
+		wire.Struct(new(Suite), "*"),
 	)
 	return &Suite{}, nil
 }

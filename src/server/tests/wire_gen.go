@@ -30,9 +30,18 @@ func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, error) {
 		Interceptor:     streamServerInterceptor,
 	}
 	server := di.ProvideServer(serverBuilder)
-	suite, err := newSuite(t, server, mockMessageSender, mockMessages)
+	clientConn, err := newConnection(t, server)
 	if err != nil {
 		return nil, err
+	}
+	messengerClient := newClient(clientConn)
+	suite := &Suite{
+		grpcServer:             server,
+		messengerServiceClient: messengerClient,
+		conn:                   clientConn,
+		messageSender:          mockMessageSender,
+		messageStore:           mockMessages,
+		t:                      t,
 	}
 	return suite, nil
 }

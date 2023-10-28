@@ -10,7 +10,7 @@ import (
 func (m *Messages) Save(ctx context.Context, message *entity.Message) error {
 	const op = "Messages.Save"
 
-	insert := "insert into messages (id, sender_id, recipient_id, text) values ($1, $2, $3, $4)"
+	insert := "insert into messages (id, sender_id, recipient_id, text) values ($1, $2, $3, $4) on conflict (id) do update set text = $4"
 
 	_, err := m.DB.Exec(ctx, insert, message.MessageID.String(), message.SenderID, message.RecipientID, message.Text)
 	if err != nil {

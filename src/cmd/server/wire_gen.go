@@ -12,24 +12,23 @@ import (
 	"github.com/kolesnikovm/messenger/di"
 	"github.com/kolesnikovm/messenger/server/grpc"
 	"github.com/kolesnikovm/messenger/server/grpc/messenger"
-	"github.com/kolesnikovm/messenger/store/postgres/messages"
 	"github.com/kolesnikovm/messenger/usecase/message"
 )
 
 // Injectors from wire.go:
 
 func InitializeApplication(ctx context.Context, conf configs.ServerConfig) (*application, func(), error) {
-	messageSender, cleanup, err := di.ProvideNotifier(conf)
+	db, cleanup, err := di.ProvideDB(ctx, conf)
 	if err != nil {
 		return nil, nil, err
 	}
-	db, cleanup2, err := di.ProvideDB(ctx, conf)
+	messages := di.ProvideMessages(ctx, db, conf)
+	messageSender, cleanup2, err := di.ProvideNotifier(conf, messages)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	messagesMessages := messages.New(db)
-	messageUseCase := message.New(messageSender, messagesMessages)
+	messageUseCase := message.New(messageSender)
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := grpc.NewInterceptor()
 	serverBuilder := grpc.ServerBuilder{

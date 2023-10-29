@@ -7,10 +7,6 @@ import (
 )
 
 func (m *MessageUseCase) Send(ctx context.Context, message entity.Message) error {
-	if err := m.messageStore.Save(ctx, &message); err != nil {
-		return err
-	}
-
 	if err := m.messageSender.Send(ctx, message); err != nil {
 		return err
 	}

@@ -21,8 +21,7 @@ import (
 
 func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, error) {
 	mockMessageSender := mocks.ProvideNotifier(t)
-	mockMessages := mocks2.ProvideStore(t)
-	messageUseCase := message.New(mockMessageSender, mockMessages)
+	messageUseCase := message.New(mockMessageSender)
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := grpc.NewInterceptor()
 	serverBuilder := grpc.ServerBuilder{
@@ -35,6 +34,7 @@ func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, error) {
 		return nil, err
 	}
 	messengerClient := newClient(clientConn)
+	mockMessages := mocks2.ProvideStore(t)
 	suite := &Suite{
 		grpcServer:             server,
 		messengerServiceClient: messengerClient,

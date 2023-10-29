@@ -20,8 +20,11 @@ func ProvideDB(ctx context.Context, conf configs.ServerConfig) (*postgres.DB, fu
 	return db, cleanup, err
 }
 
+func ProvideMessages(ctx context.Context, db *postgres.DB, conf configs.ServerConfig) store.Messages {
+	return messages.New(ctx, db, conf.Postgres)
+}
+
 var StoreSet = wire.NewSet(
 	ProvideDB,
-	messages.New,
-	wire.Bind(new(store.Messages), new(*messages.Messages)),
+	ProvideMessages,
 )

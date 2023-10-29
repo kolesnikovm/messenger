@@ -27,6 +27,7 @@ func newViper() *viper.Viper {
 	vp.SetDefault("postgres.url", "postgres://postgres:postgres@localhost:5432/messenger")
 	vp.SetDefault("postgres.max_connections", 10)
 	vp.SetDefault("postgres.max_connection_lifetime", 10*time.Minute)
+	vp.SetDefault("postgres.batch_size", 10)
 
 	vp.SetDefault("server_address", "127.0.0.1:9101")
 
@@ -46,6 +47,7 @@ type Postgres struct {
 	URL             string        `mapstructure:"url"`
 	MaxConns        int32         `mapstructure:"max_connections"`
 	MaxConnLifetime time.Duration `mapstructure:"max_connection_lifetime"`
+	BatchSize       int           `mapstructure:"batch_size"`
 }
 
 type KafkaConfig struct {

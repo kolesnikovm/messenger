@@ -29,7 +29,6 @@ func TestSendMessage(t *testing.T) {
 		RecipientID: 2,
 		Text:        "test",
 	}
-	suite.messageStore.EXPECT().Save(mock.AnythingOfType("*context.valueCtx"), &entityMessage).Return(nil)
 	suite.messageSender.EXPECT().Send(mock.AnythingOfType("*context.valueCtx"), entityMessage).Return(nil)
 
 	ctx := context.Background()
@@ -67,7 +66,6 @@ func TestSendMessageError(t *testing.T) {
 		Text:        "test",
 	}
 	notifierError := errors.New("notifier error")
-	suite.messageStore.EXPECT().Save(mock.AnythingOfType("*context.valueCtx"), &entityMessage).Return(nil)
 	suite.messageSender.EXPECT().Send(mock.AnythingOfType("*context.valueCtx"), entityMessage).Return(notifierError)
 
 	ctx := context.Background()

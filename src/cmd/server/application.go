@@ -1,15 +1,13 @@
 package server
 
 import (
+	"github.com/kolesnikovm/messenger/archiver"
+	"github.com/kolesnikovm/messenger/store"
 	"google.golang.org/grpc"
 )
 
 type application struct {
 	grpcServer *grpc.Server
-}
-
-func newApplication(grpcServer *grpc.Server) *application {
-	return &application{
-		grpcServer: grpcServer,
-	}
+	archiver   archiver.Archiver
+	aggregator store.Aggregator
 }

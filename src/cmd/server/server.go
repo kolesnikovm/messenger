@@ -41,6 +41,10 @@ var Cmd = &cobra.Command{
 			cleanup()
 		}()
 
+		app.aggregator.Start(ctx)
+
+		app.archiver.Start(ctx)
+
 		log.Info().Msgf("Messenger server listening on %v", lis.Addr())
 		if err := app.grpcServer.Serve(lis); err != nil {
 			log.Fatal().Err(err).Msg("failed to start grpc server")

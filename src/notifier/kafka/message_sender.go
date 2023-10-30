@@ -122,18 +122,10 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 						continue
 					}
 
-					kafkaMessage := &kafkaMessage{}
-					err := json.Unmarshal(msg.Value, kafkaMessage)
+					entityMessage, err := ParseMessage(msg.Value)
 					if err != nil {
-						log.Error().Err(err).Msg("failed to unmarshal message")
-						return
-					}
-
-					entityMessage := &entity.Message{
-						MessageID:   kafkaMessage.MessageID,
-						SenderID:    kafkaMessage.SenderID,
-						RecipientID: kafkaMessage.RecipientID,
-						Text:        kafkaMessage.Text,
+						log.Error().Err(err).Msg("")
+						continue
 					}
 
 					for _, userStreams := range streams {
@@ -149,4 +141,21 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 
 		}(partitionConsumer, partition)
 	}
+}
+
+func ParseMessage(byteMessage []byte) (*entity.Message, error) {
+	const op = "kafka.ParseMessage"
+
+	kafkaMessage := &kafkaMessage{}
+
+	if err := json.Unmarshal(byteMessage, kafkaMessage); err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return &entity.Message{
+		MessageID:   kafkaMessage.MessageID,
+		SenderID:    kafkaMessage.SenderID,
+		RecipientID: kafkaMessage.RecipientID,
+		Text:        kafkaMessage.Text,
+	}, nil
 }

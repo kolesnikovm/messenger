@@ -8,6 +8,7 @@ import (
 
 type Aggregator interface {
 	Add(message *entity.Message)
+	Start(ctx context.Context)
 }
 
 type Messages interface {

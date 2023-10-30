@@ -30,8 +30,27 @@ func InitializeApplication(ctx context.Context, conf configs.ServerConfig) (*app
 		Interceptor:     streamServerInterceptor,
 	}
 	server := di.ProvideServer(serverBuilder)
-	serverApplication := newApplication(server)
+	db, cleanup2, err := di.ProvideDB(ctx, conf)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	messages := di.ProvideMessages(db, conf)
+	aggregator := di.ProvideAggregator(conf, messages)
+	archiver, cleanup3, err := di.ProvideArchiver(ctx, conf, aggregator)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	serverApplication := &application{
+		grpcServer: server,
+		archiver:   archiver,
+		aggregator: aggregator,
+	}
 	return serverApplication, func() {
+		cleanup3()
+		cleanup2()
 		cleanup()
 	}, nil
 }

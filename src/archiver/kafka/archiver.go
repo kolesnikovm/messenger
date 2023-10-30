@@ -20,7 +20,7 @@ const (
 	messageTopic  = "messages"
 )
 
-func New(ctx context.Context, conf configs.KafkaConfig, messageAggregator store.Aggregator) (*Archiver, error) {
+func New(conf configs.KafkaConfig, messageAggregator store.Aggregator) (*Archiver, error) {
 	const op = "Archiver.New"
 
 	consumerConfig := sarama.NewConfig()

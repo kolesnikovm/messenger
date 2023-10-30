@@ -20,7 +20,7 @@ func TestAdd(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	db, err := postgres.New(ctx, config.Store.Postgres)
+	db, err := postgres.New(config.Store.Postgres)
 	require.NoError(t, err)
 
 	messageStore := messages.New(db, config.Store.Postgres)

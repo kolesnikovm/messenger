@@ -1,8 +1,6 @@
 package di
 
 import (
-	"context"
-
 	"github.com/google/wire"
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/store"
@@ -11,8 +9,8 @@ import (
 	"github.com/kolesnikovm/messenger/store/postgres/messages"
 )
 
-func ProvideDB(ctx context.Context, conf configs.ServerConfig) (*postgres.DB, func(), error) {
-	db, err := postgres.New(ctx, conf.Store.Postgres)
+func ProvideDB(conf configs.ServerConfig) (*postgres.DB, func(), error) {
+	db, err := postgres.New(conf.Store.Postgres)
 
 	cleanup := func() {
 		db.Close()

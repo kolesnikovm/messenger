@@ -32,7 +32,7 @@ var Cmd = &cobra.Command{
 
 		ctx, cancel := context.WithCancel(context.Background())
 
-		app, cleanup, err := InitializeApplication(ctx, config)
+		app, cleanup, err := InitializeApplication(config)
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to initialize application")
 		}

@@ -12,7 +12,7 @@ type DB struct {
 	*pgxpool.Pool
 }
 
-func New(ctx context.Context, conf configs.Postgres) (*DB, error) {
+func New(conf configs.Postgres) (*DB, error) {
 	const op = "postgres.New"
 
 	pgxConf, err := pgxpool.ParseConfig(conf.URL)
@@ -25,12 +25,12 @@ func New(ctx context.Context, conf configs.Postgres) (*DB, error) {
 	}
 	pgxConf.MaxConnLifetime = conf.MaxConnLifetime
 
-	pool, err := pgxpool.NewWithConfig(ctx, pgxConf)
+	pool, err := pgxpool.NewWithConfig(context.Background(), pgxConf)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	if err := pool.Ping(ctx); err != nil {
+	if err := pool.Ping(context.Background()); err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 

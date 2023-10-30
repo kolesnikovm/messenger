@@ -11,7 +11,6 @@ import (
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/entity"
 	"github.com/kolesnikovm/messenger/notifier/hub"
-	"github.com/kolesnikovm/messenger/store"
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -21,7 +20,6 @@ type KafkaMessageSender struct {
 	Consumer           sarama.Consumer
 	PartitionConsumers map[int32]sarama.PartitionConsumer
 	StreamHub          *hub.StreamHub
-	MessageStore       store.Messages
 	Config             configs.KafkaConfig
 }
 
@@ -34,7 +32,7 @@ type kafkaMessage struct {
 
 const messageTopic = "messages"
 
-func New(conf configs.KafkaConfig, messageStore store.Messages) (*KafkaMessageSender, error) {
+func New(conf configs.KafkaConfig) (*KafkaMessageSender, error) {
 	const op = "KafkaMessageSender.New"
 
 	config := sarama.NewConfig()
@@ -72,7 +70,6 @@ func New(conf configs.KafkaConfig, messageStore store.Messages) (*KafkaMessageSe
 		Consumer:           consumer,
 		PartitionConsumers: partitionConsumers,
 		StreamHub:          streamHub,
-		MessageStore:       messageStore,
 		Config:             conf,
 	}
 
@@ -138,8 +135,6 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 						RecipientID: kafkaMessage.RecipientID,
 						Text:        kafkaMessage.Text,
 					}
-
-					k.MessageStore.Save(entityMessage)
 
 					for _, userStreams := range streams {
 						for _, stream := range userStreams {

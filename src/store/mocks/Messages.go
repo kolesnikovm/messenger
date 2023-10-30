@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	entity "github.com/kolesnikovm/messenger/entity"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -20,35 +22,45 @@ func (_m *MockMessages) EXPECT() *MockMessages_Expecter {
 	return &MockMessages_Expecter{mock: &_m.Mock}
 }
 
-// Save provides a mock function with given fields: message
-func (_m *MockMessages) Save(message *entity.Message) {
-	_m.Called(message)
+// BatchInsert provides a mock function with given fields: ctx, messages
+func (_m *MockMessages) BatchInsert(ctx context.Context, messages []*entity.Message) error {
+	ret := _m.Called(ctx, messages)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, []*entity.Message) error); ok {
+		r0 = rf(ctx, messages)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
-// MockMessages_Save_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Save'
-type MockMessages_Save_Call struct {
+// MockMessages_BatchInsert_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'BatchInsert'
+type MockMessages_BatchInsert_Call struct {
 	*mock.Call
 }
 
-// Save is a helper method to define mock.On call
-//   - message *entity.Message
-func (_e *MockMessages_Expecter) Save(message interface{}) *MockMessages_Save_Call {
-	return &MockMessages_Save_Call{Call: _e.mock.On("Save", message)}
+// BatchInsert is a helper method to define mock.On call
+//   - ctx context.Context
+//   - messages []*entity.Message
+func (_e *MockMessages_Expecter) BatchInsert(ctx interface{}, messages interface{}) *MockMessages_BatchInsert_Call {
+	return &MockMessages_BatchInsert_Call{Call: _e.mock.On("BatchInsert", ctx, messages)}
 }
 
-func (_c *MockMessages_Save_Call) Run(run func(message *entity.Message)) *MockMessages_Save_Call {
+func (_c *MockMessages_BatchInsert_Call) Run(run func(ctx context.Context, messages []*entity.Message)) *MockMessages_BatchInsert_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*entity.Message))
+		run(args[0].(context.Context), args[1].([]*entity.Message))
 	})
 	return _c
 }
 
-func (_c *MockMessages_Save_Call) Return() *MockMessages_Save_Call {
-	_c.Call.Return()
+func (_c *MockMessages_BatchInsert_Call) Return(_a0 error) *MockMessages_BatchInsert_Call {
+	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MockMessages_Save_Call) RunAndReturn(run func(*entity.Message)) *MockMessages_Save_Call {
+func (_c *MockMessages_BatchInsert_Call) RunAndReturn(run func(context.Context, []*entity.Message) error) *MockMessages_BatchInsert_Call {
 	_c.Call.Return(run)
 	return _c
 }

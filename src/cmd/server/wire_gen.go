@@ -18,14 +18,8 @@ import (
 // Injectors from wire.go:
 
 func InitializeApplication(ctx context.Context, conf configs.ServerConfig) (*application, func(), error) {
-	db, cleanup, err := di.ProvideDB(ctx, conf)
+	messageSender, cleanup, err := di.ProvideNotifier(conf)
 	if err != nil {
-		return nil, nil, err
-	}
-	messages := di.ProvideMessages(ctx, db, conf)
-	messageSender, cleanup2, err := di.ProvideNotifier(conf, messages)
-	if err != nil {
-		cleanup()
 		return nil, nil, err
 	}
 	messageUseCase := message.New(messageSender)
@@ -38,7 +32,6 @@ func InitializeApplication(ctx context.Context, conf configs.ServerConfig) (*app
 	server := di.ProvideServer(serverBuilder)
 	serverApplication := newApplication(server)
 	return serverApplication, func() {
-		cleanup2()
 		cleanup()
 	}, nil
 }

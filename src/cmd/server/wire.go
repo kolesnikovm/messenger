@@ -16,7 +16,6 @@ func InitializeApplication(ctx context.Context, conf configs.ServerConfig) (*app
 		di.UsecaseSet,
 		di.ServerSet,
 		di.ProvideNotifier,
-		di.StoreSet,
 		newApplication,
 	)
 	return &application{}, nil, nil

@@ -6,7 +6,6 @@ import (
 
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/entity"
-	"github.com/kolesnikovm/messenger/store/mocks"
 	"github.com/oklog/ulid/v2"
 	"github.com/stretchr/testify/require"
 )
@@ -15,7 +14,7 @@ func TestGet(t *testing.T) {
 	config, err := configs.NewServerConfig("")
 	require.NoError(t, err)
 
-	kafkaMessageSender, err := New(config.KafkaConfig, mocks.NewMockMessages(t))
+	kafkaMessageSender, err := New(config.KafkaConfig)
 	require.NoError(t, err)
 
 	ctx, cancel := context.WithCancel(context.Background())

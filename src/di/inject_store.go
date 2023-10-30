@@ -11,7 +11,7 @@ import (
 )
 
 func ProvideDB(ctx context.Context, conf configs.ServerConfig) (*postgres.DB, func(), error) {
-	db, err := postgres.New(ctx, conf.Postgres)
+	db, err := postgres.New(ctx, conf.Store.Postgres)
 
 	cleanup := func() {
 		db.Close()
@@ -20,8 +20,8 @@ func ProvideDB(ctx context.Context, conf configs.ServerConfig) (*postgres.DB, fu
 	return db, cleanup, err
 }
 
-func ProvideMessages(ctx context.Context, db *postgres.DB, conf configs.ServerConfig) store.Messages {
-	return messages.New(ctx, db, conf.Postgres)
+func ProvideMessages(db *postgres.DB, conf configs.ServerConfig) store.Messages {
+	return messages.New(db, conf.Store.Postgres)
 }
 
 var StoreSet = wire.NewSet(

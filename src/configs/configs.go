@@ -24,10 +24,13 @@ func newViper() *viper.Viper {
 
 	vp.SetDefault("kafka_config.broker_list", "localhost:9094")
 
-	vp.SetDefault("postgres.url", "postgres://postgres:postgres@localhost:5432/messenger")
-	vp.SetDefault("postgres.max_connections", 10)
-	vp.SetDefault("postgres.max_connection_lifetime", 10*time.Minute)
-	vp.SetDefault("postgres.batch_size", 10)
+	vp.SetDefault("store.batch_size", 10)
+	vp.SetDefault("store.num_senders", 4)
+	vp.SetDefault("store.flush_interval", 1*time.Second)
+
+	vp.SetDefault("store.postgres.url", "postgres://postgres:postgres@localhost:5432/messenger")
+	vp.SetDefault("store.postgres.max_connections", 10)
+	vp.SetDefault("store.postgres.max_connection_lifetime", 10*time.Minute)
 
 	vp.SetDefault("server_address", "127.0.0.1:9101")
 
@@ -47,7 +50,13 @@ type Postgres struct {
 	URL             string        `mapstructure:"url"`
 	MaxConns        int32         `mapstructure:"max_connections"`
 	MaxConnLifetime time.Duration `mapstructure:"max_connection_lifetime"`
-	BatchSize       int           `mapstructure:"batch_size"`
+}
+
+type Store struct {
+	BatchSize     int           `mapstructure:"batch_size"`
+	NumSenders    int           `mapstructure:"num_senders"`
+	FlushInterval time.Duration `mapstructure:"flush_interval"`
+	Postgres      Postgres      `mapstructure:"postgres"`
 }
 
 type KafkaConfig struct {
@@ -57,7 +66,7 @@ type KafkaConfig struct {
 type ServerConfig struct {
 	ListenPort  int         `mapstructure:"listen_port"`
 	KafkaConfig KafkaConfig `mapstructure:"kafka_config"`
-	Postgres    Postgres    `mapstructure:"postgres"`
+	Store       Store       `mapstructure:"store"`
 }
 
 type ClientConfig struct {

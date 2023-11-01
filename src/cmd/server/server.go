@@ -41,6 +41,8 @@ var Cmd = &cobra.Command{
 			cleanup()
 		}()
 
+		app.notifier.Start(ctx)
+
 		app.aggregator.Start(ctx)
 
 		app.archiver.Start(ctx)

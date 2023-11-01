@@ -73,9 +73,6 @@ func New(conf configs.KafkaConfig) (*KafkaMessageSender, error) {
 		Config:             conf,
 	}
 
-	// TODO handle context
-	kafkaMessageSender.startConsumers(context.Background())
-
 	return kafkaMessageSender, nil
 }
 
@@ -88,7 +85,7 @@ func (k *KafkaMessageSender) Close() {
 	k.Producer.Close()
 }
 
-func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
+func (k *KafkaMessageSender) Start(ctx context.Context) {
 	for partition, partitionConsumer := range k.PartitionConsumers {
 		go func(partitionConsumer sarama.PartitionConsumer, partition int32) {
 			for {

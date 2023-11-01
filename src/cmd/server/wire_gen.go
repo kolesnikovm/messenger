@@ -46,6 +46,7 @@ func InitializeApplication(conf configs.ServerConfig) (*application, func(), err
 		grpcServer: server,
 		archiver:   archiver,
 		aggregator: aggregator,
+		notifier:   messageSender,
 	}
 	return serverApplication, func() {
 		cleanup3()

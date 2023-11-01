@@ -6,7 +6,7 @@ server:
 .PHONY: wire
 wire: mockery
 	cd src/cmd/server; wire
-	cd src/server/tests; wire
+	cd src/tests; wire
 
 .PHONY: protoc
 protoc:

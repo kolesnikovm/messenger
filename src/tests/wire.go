@@ -13,15 +13,15 @@ import (
 	store "github.com/kolesnikovm/messenger/store/mocks"
 )
 
-func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, error) {
+func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, func(), error) {
 	wire.Build(
 		di.UsecaseSet,
 		di.ServerSet,
+		di.ArchiverSet,
 		notifier.NotifierSet,
 		store.StoreSet,
-		newConnection,
-		newClient,
+		ClientSet,
 		wire.Struct(new(Suite), "*"),
 	)
-	return &Suite{}, nil
+	return &Suite{}, nil, nil
 }

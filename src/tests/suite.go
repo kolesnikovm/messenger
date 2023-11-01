@@ -5,6 +5,7 @@ import (
 	"net"
 	"testing"
 
+	"github.com/kolesnikovm/messenger/archiver"
 	notifier "github.com/kolesnikovm/messenger/notifier/mocks"
 	"github.com/kolesnikovm/messenger/proto"
 	store "github.com/kolesnikovm/messenger/store/mocks"
@@ -20,6 +21,7 @@ type Suite struct {
 	conn                   *grpc.ClientConn
 	messageSender          *notifier.MockMessageSender
 	messageStore           *store.MockMessages
+	archiver               archiver.Archiver
 	t                      *testing.T
 }
 
@@ -48,11 +50,4 @@ func newConnection(t *testing.T, grpcServer *grpc.Server) (*grpc.ClientConn, err
 
 func newClient(conn *grpc.ClientConn) proto.MessengerClient {
 	return proto.NewMessengerClient(conn)
-}
-
-func (s *Suite) Stop() {
-	s.grpcServer.Stop()
-
-	err := s.conn.Close()
-	require.NoErrorf(s.t, err, "failed to close grpc.ClientConn")
 }

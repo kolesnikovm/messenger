@@ -55,7 +55,7 @@ func New(conf configs.KafkaConfig) (*KafkaMessageSender, error) {
 
 	partitionConsumers := make(map[int32]sarama.PartitionConsumer)
 	for _, partition := range partitions {
-		partitionConsumer, err := consumer.ConsumePartition(messageTopic, partition, sarama.OffsetOldest)
+		partitionConsumer, err := consumer.ConsumePartition(messageTopic, partition, sarama.OffsetNewest)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", op, err)
 		}

@@ -2,14 +2,14 @@ package kafka
 
 import (
 	"github.com/IBM/sarama"
+	"github.com/kolesnikovm/messenger/archiver"
 	"github.com/kolesnikovm/messenger/notifier/kafka"
-	"github.com/kolesnikovm/messenger/store"
 	"github.com/rs/zerolog/log"
 )
 
 type Consumer struct {
 	ready             chan bool
-	MessageAggregator store.Aggregator
+	MessageAggregator archiver.Aggregator
 }
 
 func (с *Consumer) Setup(sarama.ConsumerGroupSession) error {
@@ -24,6 +24,8 @@ func (с *Consumer) Cleanup(sarama.ConsumerGroupSession) error {
 func (c *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	const op = "Consumer.ConsumeClaim"
 
+	messages := make([]*sarama.ConsumerMessage, 0)
+
 	for {
 		select {
 		case msg, ok := <-claim.Messages():
@@ -32,15 +34,23 @@ func (c *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim saram
 				return nil
 			}
 
+			messages = append(messages, msg)
+
 			entityMessage, err := kafka.ParseMessage(msg.Value)
 			if err != nil {
-				log.Error().Err(err).Msg("")
+				log.Error().Err(err).Send()
 				continue
 			}
 
-			c.MessageAggregator.Add(entityMessage)
+			flushed := c.MessageAggregator.Flush(entityMessage)
 
-			session.MarkMessage(msg, "")
+			if flushed {
+				for _, message := range messages {
+					session.MarkMessage(message, "")
+				}
+
+				messages = make([]*sarama.ConsumerMessage, 0)
+			}
 		case <-session.Context().Done():
 			return nil
 		}

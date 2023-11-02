@@ -43,8 +43,6 @@ var Cmd = &cobra.Command{
 
 		app.notifier.Start(ctx)
 
-		app.aggregator.Start(ctx)
-
 		app.archiver.Start(ctx)
 
 		log.Info().Msgf("Messenger server listening on %v", lis.Addr())

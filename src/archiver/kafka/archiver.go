@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/IBM/sarama"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/store"
 	"github.com/rs/zerolog/log"
@@ -30,9 +31,15 @@ func New(kafkaConfig configs.KafkaConfig, archiverConfig configs.Archiver, messa
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
+	backoff := backoff.NewExponentialBackOff()
+	backoff.InitialInterval = archiverConfig.FlushInterval
+	backoff.MaxElapsedTime = 0
+	backoff.Reset()
+
 	consumer := &Consumer{
 		MessageStore: messageStore,
 		Config:       archiverConfig,
+		Backoff:      backoff,
 	}
 
 	return &Archiver{

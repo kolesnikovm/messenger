@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/IBM/sarama"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/entity"
 	"github.com/kolesnikovm/messenger/notifier/kafka"
@@ -15,6 +16,7 @@ import (
 type Consumer struct {
 	MessageStore store.Messages
 	Config       configs.Archiver
+	Backoff      *backoff.ExponentialBackOff
 }
 
 func (с *Consumer) Setup(sarama.ConsumerGroupSession) error {
@@ -69,23 +71,19 @@ func (c *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim saram
 }
 
 func (c *Consumer) sendMessages(ctx context.Context, messages []*entity.Message) {
-	err := c.MessageStore.BatchInsert(ctx, messages)
+	operation := func() error {
+		return c.MessageStore.BatchInsert(ctx, messages)
+	}
+
+	notify := func(err error, delay time.Duration) {
+		log.Error().Err(err).Dur("delay", delay).Send()
+	}
+
+	err := backoff.RetryNotify(operation, c.Backoff, notify)
 	if err == nil {
+		c.Backoff.Reset()
 		return
 	}
 
-	ticker := time.NewTicker(c.Config.FlushInterval)
-	defer ticker.Stop()
-
-	for err != nil {
-		log.Error().Err(err).Send()
-
-		select {
-		case <-ticker.C:
-			err = c.MessageStore.BatchInsert(ctx, messages)
-		case <-ctx.Done():
-			log.Error().Msg("failed to save messages to db")
-			return
-		}
-	}
+	log.Error().Err(err).Msg("failed to save messages to db")
 }

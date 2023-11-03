@@ -4,6 +4,7 @@ go 1.21.1
 
 require (
 	github.com/IBM/sarama v1.41.2
+	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/google/wire v0.5.0
 	github.com/jackc/pgx/v5 v5.4.3
 	github.com/mitchellh/mapstructure v1.5.0

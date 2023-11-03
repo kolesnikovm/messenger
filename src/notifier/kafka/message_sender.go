@@ -55,7 +55,7 @@ func New(conf configs.KafkaConfig) (*KafkaMessageSender, error) {
 
 	partitionConsumers := make(map[int32]sarama.PartitionConsumer)
 	for _, partition := range partitions {
-		partitionConsumer, err := consumer.ConsumePartition(messageTopic, partition, sarama.OffsetOldest)
+		partitionConsumer, err := consumer.ConsumePartition(messageTopic, partition, sarama.OffsetNewest)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", op, err)
 		}
@@ -73,9 +73,6 @@ func New(conf configs.KafkaConfig) (*KafkaMessageSender, error) {
 		Config:             conf,
 	}
 
-	// TODO handle context
-	kafkaMessageSender.startConsumers(context.Background())
-
 	return kafkaMessageSender, nil
 }
 
@@ -88,7 +85,7 @@ func (k *KafkaMessageSender) Close() {
 	k.Producer.Close()
 }
 
-func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
+func (k *KafkaMessageSender) Start(ctx context.Context) {
 	for partition, partitionConsumer := range k.PartitionConsumers {
 		go func(partitionConsumer sarama.PartitionConsumer, partition int32) {
 			for {
@@ -122,18 +119,10 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 						continue
 					}
 
-					kafkaMessage := &kafkaMessage{}
-					err := json.Unmarshal(msg.Value, kafkaMessage)
+					entityMessage, err := ParseMessage(msg.Value)
 					if err != nil {
-						log.Error().Err(err).Msg("failed to unmarshal message")
-						return
-					}
-
-					entityMessage := &entity.Message{
-						MessageID:   kafkaMessage.MessageID,
-						SenderID:    kafkaMessage.SenderID,
-						RecipientID: kafkaMessage.RecipientID,
-						Text:        kafkaMessage.Text,
+						log.Error().Err(err).Msg("")
+						continue
 					}
 
 					for _, userStreams := range streams {
@@ -149,4 +138,21 @@ func (k *KafkaMessageSender) startConsumers(ctx context.Context) {
 
 		}(partitionConsumer, partition)
 	}
+}
+
+func ParseMessage(byteMessage []byte) (*entity.Message, error) {
+	const op = "kafka.ParseMessage"
+
+	kafkaMessage := &kafkaMessage{}
+
+	if err := json.Unmarshal(byteMessage, kafkaMessage); err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return &entity.Message{
+		MessageID:   kafkaMessage.MessageID,
+		SenderID:    kafkaMessage.SenderID,
+		RecipientID: kafkaMessage.RecipientID,
+		Text:        kafkaMessage.Text,
+	}, nil
 }

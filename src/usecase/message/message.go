@@ -1,6 +1,8 @@
 package message
 
-import "github.com/kolesnikovm/messenger/notifier"
+import (
+	"github.com/kolesnikovm/messenger/notifier"
+)
 
 type MessageUseCase struct {
 	messageSender notifier.MessageSender

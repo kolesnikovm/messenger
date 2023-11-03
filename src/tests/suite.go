@@ -5,8 +5,10 @@ import (
 	"net"
 	"testing"
 
-	"github.com/kolesnikovm/messenger/notifier/mocks"
+	"github.com/kolesnikovm/messenger/archiver"
+	notifier "github.com/kolesnikovm/messenger/notifier/mocks"
 	"github.com/kolesnikovm/messenger/proto"
+	store "github.com/kolesnikovm/messenger/store/mocks"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -17,11 +19,13 @@ type Suite struct {
 	grpcServer             *grpc.Server
 	messengerServiceClient proto.MessengerClient
 	conn                   *grpc.ClientConn
-	messageSender          *mocks.MockMessageSender
+	messageSender          *notifier.MockMessageSender
+	messageStore           *store.MockMessages
+	archiver               archiver.Archiver
 	t                      *testing.T
 }
 
-func newSuite(t *testing.T, grpcServer *grpc.Server, messageSender *mocks.MockMessageSender) (*Suite, error) {
+func newConnection(t *testing.T, grpcServer *grpc.Server) (*grpc.ClientConn, error) {
 	const bufSize = 1024 * 1024
 	lis := bufconn.Listen(bufSize)
 
@@ -41,20 +45,9 @@ func newSuite(t *testing.T, grpcServer *grpc.Server, messageSender *mocks.MockMe
 		return nil, err
 	}
 
-	messengerServiceClient := proto.NewMessengerClient(conn)
-
-	return &Suite{
-		grpcServer:             grpcServer,
-		messengerServiceClient: messengerServiceClient,
-		conn:                   conn,
-		messageSender:          messageSender,
-		t:                      t,
-	}, nil
+	return conn, nil
 }
 
-func (s *Suite) Stop() {
-	s.grpcServer.Stop()
-
-	err := s.conn.Close()
-	require.NoErrorf(s.t, err, "failed to close grpc.ClientConn")
+func newClient(conn *grpc.ClientConn) proto.MessengerClient {
+	return proto.NewMessengerClient(conn)
 }

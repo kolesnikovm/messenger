@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
@@ -23,6 +24,14 @@ func newViper() *viper.Viper {
 
 	vp.SetDefault("kafka_config.broker_list", "localhost:9094")
 
+	vp.SetDefault("archiver.batch_size", 10)
+	vp.SetDefault("archiver.num_senders", 4)
+	vp.SetDefault("archiver.flush_interval", 1*time.Second)
+
+	vp.SetDefault("postgres.url", "postgres://postgres:postgres@localhost:5432/messenger")
+	vp.SetDefault("postgres.max_connections", 10)
+	vp.SetDefault("postgres.max_connection_lifetime", 10*time.Minute)
+
 	vp.SetDefault("server_address", "127.0.0.1:9101")
 
 	return vp
@@ -37,6 +46,18 @@ type Address struct {
 	Port int
 }
 
+type Postgres struct {
+	URL             string        `mapstructure:"url"`
+	MaxConns        int32         `mapstructure:"max_connections"`
+	MaxConnLifetime time.Duration `mapstructure:"max_connection_lifetime"`
+}
+
+type Archiver struct {
+	BatchSize     int           `mapstructure:"batch_size"`
+	NumSenders    int           `mapstructure:"num_senders"`
+	FlushInterval time.Duration `mapstructure:"flush_interval"`
+}
+
 type KafkaConfig struct {
 	BrokerList []string `mapstructure:"broker_list"`
 }
@@ -44,6 +65,8 @@ type KafkaConfig struct {
 type ServerConfig struct {
 	ListenPort  int         `mapstructure:"listen_port"`
 	KafkaConfig KafkaConfig `mapstructure:"kafka_config"`
+	Archiver    Archiver    `mapstructure:"archiver"`
+	Postgres    Postgres    `mapstructure:"postgres"`
 }
 
 type ClientConfig struct {

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net"
 
@@ -29,11 +30,20 @@ var Cmd = &cobra.Command{
 			log.Fatal().Err(err).Msgf("failed to listen port %d", config.ListenPort)
 		}
 
+		ctx, cancel := context.WithCancel(context.Background())
+
 		app, cleanup, err := InitializeApplication(config)
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to initialize application")
 		}
-		defer cleanup()
+		defer func() {
+			cancel()
+			cleanup()
+		}()
+
+		app.notifier.Start(ctx)
+
+		app.archiver.Start(ctx)
 
 		log.Info().Msgf("Messenger server listening on %v", lis.Addr())
 		if err := app.grpcServer.Serve(lis); err != nil {

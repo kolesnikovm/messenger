@@ -29,8 +29,26 @@ func InitializeApplication(conf configs.ServerConfig) (*application, func(), err
 		Interceptor:     streamServerInterceptor,
 	}
 	server := di.ProvideServer(serverBuilder)
-	serverApplication := newApplication(server)
+	db, cleanup2, err := di.ProvideDB(conf)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	messages := di.ProvideMessages(db, conf)
+	archiver, cleanup3, err := di.ProvideArchiver(conf, messages)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	serverApplication := &application{
+		grpcServer: server,
+		archiver:   archiver,
+		notifier:   messageSender,
+	}
 	return serverApplication, func() {
+		cleanup3()
+		cleanup2()
 		cleanup()
 	}, nil
 }

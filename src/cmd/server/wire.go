@@ -14,7 +14,9 @@ func InitializeApplication(conf configs.ServerConfig) (*application, func(), err
 		di.UsecaseSet,
 		di.ServerSet,
 		di.ProvideNotifier,
-		newApplication,
+		di.StoreSet,
+		di.ArchiverSet,
+		wire.Struct(new(application), "*"),
 	)
 	return &application{}, nil, nil
 }

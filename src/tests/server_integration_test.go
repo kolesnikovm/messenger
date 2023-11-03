@@ -18,9 +18,9 @@ func TestSendMessage(t *testing.T) {
 	config, err := configs.NewServerConfig("")
 	require.NoError(t, err)
 
-	suite, err := InitializeSuite(t, config)
+	suite, cleanup, err := InitializeSuite(t, config)
 	require.NoError(t, err)
-	defer suite.Stop()
+	defer cleanup()
 
 	messageID := ulid.Make()
 	entityMessage := entity.Message{
@@ -54,9 +54,9 @@ func TestSendMessageError(t *testing.T) {
 	config, err := configs.NewServerConfig("")
 	require.NoError(t, err)
 
-	suite, err := InitializeSuite(t, config)
+	suite, cleanup, err := InitializeSuite(t, config)
 	require.NoError(t, err)
-	defer suite.Stop()
+	defer cleanup()
 
 	messageID := ulid.Make()
 	entityMessage := entity.Message{
@@ -89,9 +89,9 @@ func TestGetMessage(t *testing.T) {
 	config, err := configs.NewServerConfig("")
 	require.NoError(t, err)
 
-	suite, err := InitializeSuite(t, config)
+	suite, cleanup, err := InitializeSuite(t, config)
 	require.NoError(t, err)
-	defer suite.Stop()
+	defer cleanup()
 
 	messageID := ulid.Make()
 	entityMessage := &entity.Message{

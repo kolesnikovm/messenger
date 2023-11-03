@@ -12,13 +12,14 @@ import (
 	"github.com/kolesnikovm/messenger/notifier/mocks"
 	"github.com/kolesnikovm/messenger/server/grpc"
 	"github.com/kolesnikovm/messenger/server/grpc/messenger"
+	mocks2 "github.com/kolesnikovm/messenger/store/mocks"
 	"github.com/kolesnikovm/messenger/usecase/message"
 	"testing"
 )
 
 // Injectors from wire.go:
 
-func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, error) {
+func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, func(), error) {
 	mockMessageSender := mocks.ProvideNotifier(t)
 	messageUseCase := message.New(mockMessageSender)
 	handler := messenger.NewHandler(messageUseCase)
@@ -28,9 +29,28 @@ func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, error) {
 		Interceptor:     streamServerInterceptor,
 	}
 	server := di.ProvideServer(serverBuilder)
-	suite, err := newSuite(t, server, mockMessageSender)
+	clientConn, cleanup, err := ProvideConnection(t, server)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return suite, nil
+	messengerClient := newClient(clientConn)
+	mockMessages := mocks2.ProvideStore(t)
+	archiver, cleanup2, err := di.ProvideArchiver(conf, mockMessages)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	suite := &Suite{
+		grpcServer:             server,
+		messengerServiceClient: messengerClient,
+		conn:                   clientConn,
+		messageSender:          mockMessageSender,
+		messageStore:           mockMessages,
+		archiver:               archiver,
+		t:                      t,
+	}
+	return suite, func() {
+		cleanup2()
+		cleanup()
+	}, nil
 }

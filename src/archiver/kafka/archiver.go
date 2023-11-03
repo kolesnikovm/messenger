@@ -31,7 +31,6 @@ func New(conf configs.KafkaConfig, messageAggregator archiver.Aggregator) (*Arch
 	}
 
 	consumer := &Consumer{
-		ready:             make(chan bool),
 		MessageAggregator: messageAggregator,
 	}
 
@@ -54,11 +53,8 @@ func (a *Archiver) Start(ctx context.Context) {
 			if ctx.Err() != nil {
 				return
 			}
-			a.GroupConsumer.ready = make(chan bool)
 		}
 	}()
-
-	<-a.GroupConsumer.ready
 }
 
 func (a *Archiver) Close() {

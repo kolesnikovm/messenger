@@ -8,12 +8,10 @@ import (
 )
 
 type Consumer struct {
-	ready             chan bool
 	MessageAggregator archiver.Aggregator
 }
 
 func (с *Consumer) Setup(sarama.ConsumerGroupSession) error {
-	close(с.ready)
 	return nil
 }
 

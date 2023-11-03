@@ -80,10 +80,10 @@ func (c *Consumer) sendMessages(ctx context.Context, messages []*entity.Message)
 	}
 
 	err := backoff.RetryNotify(operation, c.Backoff, notify)
-	if err == nil {
-		c.Backoff.Reset()
+	if err != nil {
+		log.Error().Err(err).Msg("failed to save messages to db")
 		return
 	}
 
-	log.Error().Err(err).Msg("failed to save messages to db")
+	c.Backoff.Reset()
 }

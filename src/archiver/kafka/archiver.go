@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/IBM/sarama"
-	"github.com/kolesnikovm/messenger/archiver"
 	"github.com/kolesnikovm/messenger/configs"
+	"github.com/kolesnikovm/messenger/store"
 	"github.com/rs/zerolog/log"
 )
 
@@ -20,18 +20,19 @@ const (
 	messageTopic  = "messages"
 )
 
-func New(conf configs.KafkaConfig, messageAggregator archiver.Aggregator) (*Archiver, error) {
+func New(kafkaConfig configs.KafkaConfig, archiverConfig configs.Archiver, messageStore store.Messages) (*Archiver, error) {
 	const op = "Archiver.New"
 
 	consumerConfig := sarama.NewConfig()
 
-	client, err := sarama.NewConsumerGroup(conf.BrokerList, consumerGroup, consumerConfig)
+	client, err := sarama.NewConsumerGroup(kafkaConfig.BrokerList, consumerGroup, consumerConfig)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	consumer := &Consumer{
-		MessageAggregator: messageAggregator,
+		MessageStore: messageStore,
+		Config:       archiverConfig,
 	}
 
 	return &Archiver{

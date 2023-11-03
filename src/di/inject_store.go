@@ -9,7 +9,7 @@ import (
 )
 
 func ProvideDB(conf configs.ServerConfig) (*postgres.DB, func(), error) {
-	db, err := postgres.New(conf.Store.Postgres)
+	db, err := postgres.New(conf.Postgres)
 
 	cleanup := func() {
 		db.Close()
@@ -19,7 +19,7 @@ func ProvideDB(conf configs.ServerConfig) (*postgres.DB, func(), error) {
 }
 
 func ProvideMessages(db *postgres.DB, conf configs.ServerConfig) store.Messages {
-	return messages.New(db, conf.Store.Postgres)
+	return messages.New(db, conf.Postgres)
 }
 
 var StoreSet = wire.NewSet(

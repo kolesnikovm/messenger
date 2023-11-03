@@ -35,8 +35,7 @@ func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, func(), e
 	}
 	messengerClient := newClient(clientConn)
 	mockMessages := mocks2.ProvideStore(t)
-	aggregator := di.ProvideAggregator(conf, mockMessages)
-	archiver, cleanup2, err := di.ProvideArchiver(conf, aggregator)
+	archiver, cleanup2, err := di.ProvideArchiver(conf, mockMessages)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

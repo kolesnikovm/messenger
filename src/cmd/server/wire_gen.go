@@ -35,8 +35,7 @@ func InitializeApplication(conf configs.ServerConfig) (*application, func(), err
 		return nil, nil, err
 	}
 	messages := di.ProvideMessages(db, conf)
-	aggregator := di.ProvideAggregator(conf, messages)
-	archiver, cleanup3, err := di.ProvideArchiver(conf, aggregator)
+	archiver, cleanup3, err := di.ProvideArchiver(conf, messages)
 	if err != nil {
 		cleanup2()
 		cleanup()

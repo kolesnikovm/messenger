@@ -4,9 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sort"
-	"strconv"
-	"strings"
 
 	"github.com/IBM/sarama"
 	"github.com/kolesnikovm/messenger/entity"
@@ -32,7 +29,7 @@ func (k *KafkaMessageSender) Send(ctx context.Context, msg entity.Message) error
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
-	messageKey := composeKey(msg.SenderID, msg.RecipientID)
+	messageKey := msg.GetChatID()
 
 	resultCh := make(chan *result)
 
@@ -66,16 +63,4 @@ func (k *KafkaMessageSender) Send(ctx context.Context, msg entity.Message) error
 	}
 
 	return nil
-}
-
-func composeKey(id1, id2 uint64) string {
-	slice := []uint64{id1, id2}
-	sort.SliceStable(slice, func(i, j int) bool { return slice[i] < slice[j] })
-
-	var stringSlice []string
-	for _, id := range slice {
-		stringSlice = append(stringSlice, strconv.Itoa(int(id)))
-	}
-
-	return strings.Join(stringSlice, ":")
 }

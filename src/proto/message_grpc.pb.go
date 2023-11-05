@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type MessengerClient interface {
 	SendMessage(ctx context.Context, opts ...grpc.CallOption) (Messenger_SendMessageClient, error)
 	GetMessage(ctx context.Context, in *MessaggeRequest, opts ...grpc.CallOption) (Messenger_GetMessageClient, error)
+	GetMessageHistory(ctx context.Context, in *HistoryRequest, opts ...grpc.CallOption) (*HistoryResponse, error)
 }
 
 type messengerClient struct {
@@ -100,12 +101,22 @@ func (x *messengerGetMessageClient) Recv() (*Message, error) {
 	return m, nil
 }
 
+func (c *messengerClient) GetMessageHistory(ctx context.Context, in *HistoryRequest, opts ...grpc.CallOption) (*HistoryResponse, error) {
+	out := new(HistoryResponse)
+	err := c.cc.Invoke(ctx, "/Messenger/GetMessageHistory", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MessengerServer is the server API for Messenger service.
 // All implementations should embed UnimplementedMessengerServer
 // for forward compatibility
 type MessengerServer interface {
 	SendMessage(Messenger_SendMessageServer) error
 	GetMessage(*MessaggeRequest, Messenger_GetMessageServer) error
+	GetMessageHistory(context.Context, *HistoryRequest) (*HistoryResponse, error)
 }
 
 // UnimplementedMessengerServer should be embedded to have forward compatible implementations.
@@ -117,6 +128,9 @@ func (UnimplementedMessengerServer) SendMessage(Messenger_SendMessageServer) err
 }
 func (UnimplementedMessengerServer) GetMessage(*MessaggeRequest, Messenger_GetMessageServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetMessage not implemented")
+}
+func (UnimplementedMessengerServer) GetMessageHistory(context.Context, *HistoryRequest) (*HistoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMessageHistory not implemented")
 }
 
 // UnsafeMessengerServer may be embedded to opt out of forward compatibility for this service.
@@ -177,13 +191,36 @@ func (x *messengerGetMessageServer) Send(m *Message) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Messenger_GetMessageHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessengerServer).GetMessageHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Messenger/GetMessageHistory",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessengerServer).GetMessageHistory(ctx, req.(*HistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Messenger_ServiceDesc is the grpc.ServiceDesc for Messenger service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Messenger_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "Messenger",
 	HandlerType: (*MessengerServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetMessageHistory",
+			Handler:    _Messenger_GetMessageHistory_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "SendMessage",

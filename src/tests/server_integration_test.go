@@ -115,3 +115,28 @@ func TestGetMessage(t *testing.T) {
 
 	require.Equal(t, message.MessageID, messageID.Bytes())
 }
+
+func TestGetMessageHistory(t *testing.T) {
+	config, err := configs.NewServerConfig("")
+	require.NoError(t, err)
+
+	suite, cleanup, err := InitializeSuite(t, config)
+	require.NoError(t, err)
+	defer cleanup()
+
+	entityMessages := []*entity.Message{{
+		MessageID:   ulid.Make(),
+		SenderID:    1,
+		RecipientID: 2,
+		Text:        "test",
+	}}
+	suite.messageStore.EXPECT().GetMessageHistory(mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("ulid.ULID"), "1:2").Return(entityMessages, nil)
+
+	ctx := context.Background()
+	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1")
+	historyResponse, err := suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "1:2", MessageID: ulid.Make().Bytes()})
+	require.NoErrorf(t, err, "Failed to get mesage history")
+
+	message := historyResponse.Messages[0]
+	require.Equal(t, entityMessages[0].MessageID.Bytes(), message.MessageID)
+}

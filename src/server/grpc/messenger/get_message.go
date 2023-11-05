@@ -2,7 +2,6 @@ package messenger
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/kolesnikovm/messenger/proto"
 	"github.com/oklog/ulid/v2"
@@ -43,17 +42,5 @@ func (h *Handler) GetMessage(msgRequest *proto.MessaggeRequest, stream proto.Mes
 		case <-stream.Context().Done():
 			return nil
 		}
-	}
-}
-
-func getHeader(md metadata.MD, header string) (uint64, error) {
-	if len(md.Get(header)) > 0 {
-		id, err := strconv.ParseUint(md.Get(header)[0], 10, 64)
-		if err != nil {
-			return 0, fmt.Errorf("failed to parse header %s: %v", header, md.Get(header))
-		}
-		return id, nil
-	} else {
-		return 0, fmt.Errorf("no %s header in request", header)
 	}
 }

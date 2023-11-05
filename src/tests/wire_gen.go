@@ -21,7 +21,8 @@ import (
 
 func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, func(), error) {
 	mockMessageSender := mocks.ProvideNotifier(t)
-	messageUseCase := message.New(mockMessageSender)
+	mockMessages := mocks2.ProvideStore(t)
+	messageUseCase := message.New(mockMessageSender, mockMessages)
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := grpc.NewInterceptor()
 	serverBuilder := grpc.ServerBuilder{
@@ -34,7 +35,6 @@ func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, func(), e
 		return nil, nil, err
 	}
 	messengerClient := newClient(clientConn)
-	mockMessages := mocks2.ProvideStore(t)
 	archiver, cleanup2, err := di.ProvideArchiver(conf, mockMessages)
 	if err != nil {
 		cleanup()

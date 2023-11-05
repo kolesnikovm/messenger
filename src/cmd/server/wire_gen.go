@@ -21,7 +21,13 @@ func InitializeApplication(conf configs.ServerConfig) (*application, func(), err
 	if err != nil {
 		return nil, nil, err
 	}
-	messageUseCase := message.New(messageSender)
+	db, cleanup2, err := di.ProvideDB(conf)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	messages := di.ProvideMessages(db, conf)
+	messageUseCase := message.New(messageSender, messages)
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := grpc.NewInterceptor()
 	serverBuilder := grpc.ServerBuilder{
@@ -29,12 +35,6 @@ func InitializeApplication(conf configs.ServerConfig) (*application, func(), err
 		Interceptor:     streamServerInterceptor,
 	}
 	server := di.ProvideServer(serverBuilder)
-	db, cleanup2, err := di.ProvideDB(conf)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	messages := di.ProvideMessages(db, conf)
 	archiver, cleanup3, err := di.ProvideArchiver(conf, messages)
 	if err != nil {
 		cleanup2()

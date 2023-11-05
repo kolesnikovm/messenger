@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -25,4 +26,26 @@ func (m *Message) GetChatID() string {
 	}
 
 	return strings.Join(stringSlice, ":")
+}
+
+func ParseChatID(chatID string) (user1 uint64, user2 uint64, err error) {
+	const op = "entity.ParseChatID"
+
+	chatParticipants := strings.Split(chatID, ":")
+
+	if len(chatParticipants) != 2 {
+		return 0, 0, fmt.Errorf("%s: failed to get chat participants from chat id: %s", op, chatID)
+	}
+
+	user1, err = strconv.ParseUint(chatParticipants[0], 10, 64)
+	if err != nil {
+		return 0, 0, fmt.Errorf("%s: failed to parse user id from: %s", op, chatParticipants[0])
+	}
+
+	user2, err = strconv.ParseUint(chatParticipants[1], 10, 64)
+	if err != nil {
+		return 0, 0, fmt.Errorf("%s: failed to parse user id from: %s", op, chatParticipants[1])
+	}
+
+	return user1, user2, nil
 }

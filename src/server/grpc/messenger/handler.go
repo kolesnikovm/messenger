@@ -2,11 +2,13 @@ package messenger
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/kolesnikovm/messenger/entity"
 	pb "github.com/kolesnikovm/messenger/proto"
 	usecase "github.com/kolesnikovm/messenger/usecase"
 	"github.com/oklog/ulid/v2"
+	"google.golang.org/grpc/metadata"
 )
 
 type Handler struct {
@@ -35,4 +37,16 @@ func (s *Handler) transformMessageRPC(msg *pb.Message) (entity.Message, error) {
 	}
 
 	return res, nil
+}
+
+func getHeader(md metadata.MD, header string) (uint64, error) {
+	if len(md.Get(header)) > 0 {
+		id, err := strconv.ParseUint(md.Get(header)[0], 10, 64)
+		if err != nil {
+			return 0, fmt.Errorf("failed to parse header %s: %v", header, md.Get(header))
+		}
+		return id, nil
+	} else {
+		return 0, fmt.Errorf("no %s header in request", header)
+	}
 }

@@ -24,6 +24,7 @@ var cmdUp = &cobra.Command{
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to create migrations")
 		}
+		defer migrations.Close()
 
 		if err := migrations.Up(); err != nil {
 			log.Fatal().Err(err).Msg("failed to perform up migration")

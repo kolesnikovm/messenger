@@ -39,7 +39,7 @@ func TestSendMessage(t *testing.T) {
 	require.NoErrorf(t, err, "Failed to create stream")
 
 	message := &proto.Message{
-		MessageID:   messageID.Bytes(),
+		MessageID:   messageID.String(),
 		SenderID:    1,
 		RecipientID: 2,
 		Text:        "test",
@@ -71,7 +71,7 @@ func TestSendMessageInternalError(t *testing.T) {
 	require.NoErrorf(t, err, "Failed to create stream")
 
 	message := &proto.Message{
-		MessageID:   messageID.Bytes(),
+		MessageID:   messageID.String(),
 		SenderID:    1,
 		RecipientID: 2,
 		Text:        "test",
@@ -96,7 +96,7 @@ func TestSendMessageAuthError(t *testing.T) {
 	require.NoErrorf(t, err, "Failed to create stream")
 
 	message := &proto.Message{
-		MessageID:   ulid.Make().Bytes(),
+		MessageID:   ulid.Make().String(),
 		SenderID:    1,
 		RecipientID: 2,
 		Text:        "test",
@@ -136,7 +136,7 @@ func TestGetMessage(t *testing.T) {
 	message, err := stream.Recv()
 	require.NoErrorf(t, err, "Error in %v.Send(%v)", stream, message)
 
-	require.Equal(t, message.MessageID, messageID.Bytes())
+	require.Equal(t, messageID.String(), message.MessageID)
 }
 
 func TestGetMessageHistory(t *testing.T) {
@@ -157,11 +157,11 @@ func TestGetMessageHistory(t *testing.T) {
 
 	ctx := context.Background()
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1")
-	historyResponse, err := suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "1:2", MessageID: ulid.Make().Bytes()})
+	historyResponse, err := suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "1:2", MessageID: ulid.Make().String()})
 	require.NoErrorf(t, err, "Failed to get mesage history")
 
 	message := historyResponse.Messages[0]
-	require.Equal(t, entityMessages[0].MessageID.Bytes(), message.MessageID)
+	require.Equal(t, entityMessages[0].MessageID.String(), message.MessageID)
 }
 
 func TestGetMessageHistoryInternalError(t *testing.T) {
@@ -177,7 +177,7 @@ func TestGetMessageHistoryInternalError(t *testing.T) {
 
 	ctx := context.Background()
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1")
-	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "1:2", MessageID: ulid.Make().Bytes()})
+	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "1:2", MessageID: ulid.Make().String()})
 	require.EqualError(t, err, "rpc error: code = Internal desc = Internal")
 }
 
@@ -190,7 +190,7 @@ func TestGetMessageHistoryAuthError(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "1:2", MessageID: ulid.Make().Bytes()})
+	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "1:2", MessageID: ulid.Make().String()})
 	require.EqualError(t, err, "rpc error: code = Unauthenticated desc = Unauthenticated")
 
 	st, ok := status.FromError(err)
@@ -210,7 +210,7 @@ func TestGetMessageHistoryArgumentError(t *testing.T) {
 
 	ctx := context.Background()
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1")
-	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "", MessageID: ulid.Make().Bytes()})
+	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "", MessageID: ulid.Make().String()})
 	require.EqualError(t, err, "rpc error: code = InvalidArgument desc = InvalidArgument")
 
 	st, ok := status.FromError(err)
@@ -220,7 +220,7 @@ func TestGetMessageHistoryArgumentError(t *testing.T) {
 	require.Equal(t, "failed to parse chat id from: ", details.FieldViolations[0].Description)
 
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "")
-	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "1:2", MessageID: []byte{}})
+	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "1:2", MessageID: ""})
 	require.EqualError(t, err, "rpc error: code = InvalidArgument desc = InvalidArgument")
 
 	st, ok = status.FromError(err)
@@ -240,6 +240,6 @@ func TestGetMessageHistoryPermissionError(t *testing.T) {
 
 	ctx := context.Background()
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1")
-	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "2:3", MessageID: ulid.Make().Bytes()})
+	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "2:3", MessageID: ulid.Make().String()})
 	require.EqualError(t, err, "rpc error: code = NotFound desc = Chat not found")
 }

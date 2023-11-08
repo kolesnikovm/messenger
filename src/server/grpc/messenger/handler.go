@@ -24,8 +24,8 @@ func NewHandler(usecase usecase.Message) *Handler {
 func (s *Handler) transformMessageRPC(msg *pb.Message) (entity.Message, error) {
 	const op = "Handler.transformMessageRPC"
 
-	messageID := ulid.ULID{}
-	if err := messageID.UnmarshalBinary(msg.MessageID); err != nil {
+	messageID, err := ulid.Parse(msg.MessageID)
+	if err != nil {
 		return entity.Message{}, fmt.Errorf("%s: %w", op, err)
 	}
 

@@ -17,7 +17,7 @@ func (h *Handler) GetMessage(msgRequest *proto.MessaggeRequest, stream proto.Mes
 		select {
 		case message := <-messageCh:
 			protoMsg := &proto.Message{
-				MessageID:   message.MessageID.Bytes(),
+				MessageID:   message.MessageID.String(),
 				SenderID:    message.SenderID,
 				RecipientID: message.RecipientID,
 				Text:        message.Text,

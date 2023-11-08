@@ -18,9 +18,9 @@ func (h *Handler) GetMessageHistory(ctx context.Context, req *proto.HistoryReque
 
 	userID := ctx.Value("userID").(uint64)
 
-	messageID := ulid.ULID{}
-	if err := messageID.UnmarshalBinary(req.MessageID); err != nil {
-		log.Error().Err(err).Send()
+	messageID, err := ulid.Parse(req.MessageID)
+	if err != nil {
+		log.Error().Err(err).Str("op", op).Send()
 
 		statusError := composeInvalidArgumentError("HistoryRequest.messageID", fmt.Sprintf("failed to get message id if from: %s", req.MessageID))
 
@@ -50,7 +50,7 @@ func (h *Handler) GetMessageHistory(ctx context.Context, req *proto.HistoryReque
 	protoMessages := make([]*proto.Message, 0, len(messages))
 	for _, message := range messages {
 		protoMessages = append(protoMessages, &proto.Message{
-			MessageID:   message.MessageID.Bytes(),
+			MessageID:   message.MessageID.String(),
 			SenderID:    message.SenderID,
 			RecipientID: message.RecipientID,
 			Text:        message.Text,

@@ -9,7 +9,7 @@ service Messenger {
 }
 
 message Message {
-    bytes  messageID = 1;
+    string messageID = 1;
     uint64 senderID = 2;
     uint64 recipientID = 3;
     string text = 4;
@@ -23,7 +23,7 @@ message MessaggeRequest {}
 
 message HistoryRequest {
     string chatID = 1;
-    bytes messageID = 2;
+    string messageID = 2;
 }
 
 message HistoryResponse {

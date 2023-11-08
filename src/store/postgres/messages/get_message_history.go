@@ -30,6 +30,13 @@ func (m *Messages) GetMessageHistory(ctx context.Context, fromMessageID ulid.ULI
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", op, err)
 		}
+		if len(values) < 4 {
+			return nil, fmt.Errorf("%s: not enough values in a row: %d", op, len(values))
+		}
+
+		if err := rows.Scan(nil, &m.SenderID, nil, &m.Text); err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
 
 		recipientID, err := getRecipientID(values[2].(string), uint64(values[1].(int64)))
 		if err != nil {
@@ -42,12 +49,6 @@ func (m *Messages) GetMessageHistory(ctx context.Context, fromMessageID ulid.ULI
 			return nil, fmt.Errorf("%s: failed to cast message id to bytes", op)
 		}
 		m.MessageID = ulid.ULID(messageIdBytes)
-
-		senderID := uint64(values[1].(int64))
-		m.SenderID = senderID
-
-		text := values[3].(string)
-		m.Text = text
 
 		messages = append(messages, m)
 	}

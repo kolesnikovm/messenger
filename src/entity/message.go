@@ -22,7 +22,7 @@ func (m *Message) GetChatID() string {
 
 	var stringSlice []string
 	for _, id := range slice {
-		stringSlice = append(stringSlice, strconv.Itoa(int(id)))
+		stringSlice = append(stringSlice, strconv.FormatUint(id, 10))
 	}
 
 	return strings.Join(stringSlice, ":")

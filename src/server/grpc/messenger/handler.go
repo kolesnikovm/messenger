@@ -39,7 +39,7 @@ func (s *Handler) transformMessageRPC(msg *pb.Message) (entity.Message, error) {
 	return res, nil
 }
 
-func getHeader(md metadata.MD, header string) (uint64, error) {
+func GetHeader(md metadata.MD, header string) (uint64, error) {
 	if len(md.Get(header)) > 0 {
 		id, err := strconv.ParseUint(md.Get(header)[0], 10, 64)
 		if err != nil {

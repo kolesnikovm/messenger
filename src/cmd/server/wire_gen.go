@@ -10,6 +10,7 @@ import (
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/di"
 	"github.com/kolesnikovm/messenger/server/grpc"
+	"github.com/kolesnikovm/messenger/server/grpc/interceptors"
 	"github.com/kolesnikovm/messenger/server/grpc/messenger"
 	"github.com/kolesnikovm/messenger/usecase/message"
 )
@@ -29,10 +30,12 @@ func InitializeApplication(conf configs.ServerConfig) (*application, func(), err
 	messages := di.ProvideMessages(db, conf)
 	messageUseCase := message.New(messageSender, messages)
 	handler := messenger.NewHandler(messageUseCase)
-	streamServerInterceptor := grpc.NewInterceptor()
+	streamServerInterceptor := interceptors.NewStreamInterceptor()
+	unaryServerInterceptor := interceptors.NewUnaryInterceptor()
 	serverBuilder := grpc.ServerBuilder{
-		MessengerServer: handler,
-		Interceptor:     streamServerInterceptor,
+		MessengerServer:   handler,
+		StreamInterceptor: streamServerInterceptor,
+		UnaryInterceptor:  unaryServerInterceptor,
 	}
 	server := di.ProvideServer(serverBuilder)
 	archiver, cleanup3, err := di.ProvideArchiver(conf, messages)

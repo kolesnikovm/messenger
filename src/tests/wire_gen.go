@@ -11,6 +11,7 @@ import (
 	"github.com/kolesnikovm/messenger/di"
 	"github.com/kolesnikovm/messenger/notifier/mocks"
 	"github.com/kolesnikovm/messenger/server/grpc"
+	"github.com/kolesnikovm/messenger/server/grpc/interceptors"
 	"github.com/kolesnikovm/messenger/server/grpc/messenger"
 	mocks2 "github.com/kolesnikovm/messenger/store/mocks"
 	"github.com/kolesnikovm/messenger/usecase/message"
@@ -24,10 +25,12 @@ func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, func(), e
 	mockMessages := mocks2.ProvideStore(t)
 	messageUseCase := message.New(mockMessageSender, mockMessages)
 	handler := messenger.NewHandler(messageUseCase)
-	streamServerInterceptor := grpc.NewInterceptor()
+	streamServerInterceptor := interceptors.NewStreamInterceptor()
+	unaryServerInterceptor := interceptors.NewUnaryInterceptor()
 	serverBuilder := grpc.ServerBuilder{
-		MessengerServer: handler,
-		Interceptor:     streamServerInterceptor,
+		MessengerServer:   handler,
+		StreamInterceptor: streamServerInterceptor,
+		UnaryInterceptor:  unaryServerInterceptor,
 	}
 	server := di.ProvideServer(serverBuilder)
 	clientConn, cleanup, err := ProvideConnection(t, server)

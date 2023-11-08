@@ -67,17 +67,17 @@ func (_c *MockMessages_BatchInsert_Call) RunAndReturn(run func(context.Context, 
 	return _c
 }
 
-// GetMessageHistory provides a mock function with given fields: ctx, msgID, chatID
-func (_m *MockMessages) GetMessageHistory(ctx context.Context, msgID ulid.ULID, chatID string) ([]*entity.Message, error) {
-	ret := _m.Called(ctx, msgID, chatID)
+// GetMessageHistory provides a mock function with given fields: ctx, fromMessageID, chatID
+func (_m *MockMessages) GetMessageHistory(ctx context.Context, fromMessageID ulid.ULID, chatID string) ([]*entity.Message, error) {
+	ret := _m.Called(ctx, fromMessageID, chatID)
 
 	var r0 []*entity.Message
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, ulid.ULID, string) ([]*entity.Message, error)); ok {
-		return rf(ctx, msgID, chatID)
+		return rf(ctx, fromMessageID, chatID)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, ulid.ULID, string) []*entity.Message); ok {
-		r0 = rf(ctx, msgID, chatID)
+		r0 = rf(ctx, fromMessageID, chatID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*entity.Message)
@@ -85,7 +85,7 @@ func (_m *MockMessages) GetMessageHistory(ctx context.Context, msgID ulid.ULID, 
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, ulid.ULID, string) error); ok {
-		r1 = rf(ctx, msgID, chatID)
+		r1 = rf(ctx, fromMessageID, chatID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -100,13 +100,13 @@ type MockMessages_GetMessageHistory_Call struct {
 
 // GetMessageHistory is a helper method to define mock.On call
 //   - ctx context.Context
-//   - msgID ulid.ULID
+//   - fromMessageID ulid.ULID
 //   - chatID string
-func (_e *MockMessages_Expecter) GetMessageHistory(ctx interface{}, msgID interface{}, chatID interface{}) *MockMessages_GetMessageHistory_Call {
-	return &MockMessages_GetMessageHistory_Call{Call: _e.mock.On("GetMessageHistory", ctx, msgID, chatID)}
+func (_e *MockMessages_Expecter) GetMessageHistory(ctx interface{}, fromMessageID interface{}, chatID interface{}) *MockMessages_GetMessageHistory_Call {
+	return &MockMessages_GetMessageHistory_Call{Call: _e.mock.On("GetMessageHistory", ctx, fromMessageID, chatID)}
 }
 
-func (_c *MockMessages_GetMessageHistory_Call) Run(run func(ctx context.Context, msgID ulid.ULID, chatID string)) *MockMessages_GetMessageHistory_Call {
+func (_c *MockMessages_GetMessageHistory_Call) Run(run func(ctx context.Context, fromMessageID ulid.ULID, chatID string)) *MockMessages_GetMessageHistory_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(ulid.ULID), args[2].(string))
 	})

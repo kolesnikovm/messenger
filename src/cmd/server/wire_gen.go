@@ -28,7 +28,10 @@ func InitializeApplication(conf configs.ServerConfig) (*application, func(), err
 		return nil, nil, err
 	}
 	messages := di.ProvideMessages(db, conf)
-	messageUseCase := message.New(messageSender, messages)
+	messageUseCase := &message.MessageUseCase{
+		MessageSender: messageSender,
+		MessageStore:  messages,
+	}
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := interceptors.NewStreamInterceptor()
 	unaryServerInterceptor := interceptors.NewUnaryInterceptor()

@@ -7,6 +7,6 @@ import (
 )
 
 var UsecaseSet = wire.NewSet(
-	message.New,
+	wire.Struct(new(message.MessageUseCase), "*"),
 	wire.Bind(new(usecase.Message), new(*message.MessageUseCase)),
 )

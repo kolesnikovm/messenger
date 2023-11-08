@@ -6,13 +6,6 @@ import (
 )
 
 type MessageUseCase struct {
-	messageSender notifier.MessageSender
-	messageStore  store.Messages
-}
-
-func New(messageSender notifier.MessageSender, messageStore store.Messages) *MessageUseCase {
-	return &MessageUseCase{
-		messageSender: messageSender,
-		messageStore:  messageStore,
-	}
+	MessageSender notifier.MessageSender
+	MessageStore  store.Messages
 }

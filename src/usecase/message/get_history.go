@@ -8,7 +8,7 @@ import (
 )
 
 func (m *MessageUseCase) GetHistory(ctx context.Context, chatID string, fromMessageID ulid.ULID, userID uint64) ([]*entity.Message, error) {
-	messages, err := m.messageStore.GetMessageHistory(ctx, fromMessageID, chatID)
+	messages, err := m.MessageStore.GetMessageHistory(ctx, fromMessageID, chatID)
 	if err != nil {
 		return nil, err
 	}

@@ -23,7 +23,10 @@ import (
 func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, func(), error) {
 	mockMessageSender := mocks.ProvideNotifier(t)
 	mockMessages := mocks2.ProvideStore(t)
-	messageUseCase := message.New(mockMessageSender, mockMessages)
+	messageUseCase := &message.MessageUseCase{
+		MessageSender: mockMessageSender,
+		MessageStore:  mockMessages,
+	}
 	handler := messenger.NewHandler(messageUseCase)
 	streamServerInterceptor := interceptors.NewStreamInterceptor()
 	unaryServerInterceptor := interceptors.NewUnaryInterceptor()

@@ -8,7 +8,7 @@ import (
 	"github.com/kolesnikovm/messenger/entity"
 )
 
-const insert = "insert into messenger.messages (id, sender_id, chat_id, text) values ($1, $2, $3, $4) on conflict (id) do update set text = $4"
+const insert = "insert into messages (id, sender_id, chat_id, text) values ($1, $2, $3, $4) on conflict (id) do update set text = $4"
 
 func (m *Messages) BatchInsert(ctx context.Context, messages []*entity.Message) error {
 	const op = "Messages.BatchInsert"

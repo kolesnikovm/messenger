@@ -1,5 +1,5 @@
 -- +goose Up
-create table if not exists messenger.messages (
+create table if not exists messages (
     id 				uuid 	        primary key not null,
     sender_id 		bigint 	        not null,
     chat_id      	varchar(255) 	not null,
@@ -7,4 +7,4 @@ create table if not exists messenger.messages (
 );
 
 -- +goose Down
-drop table if exists messenger.messages;
+drop table if exists messages;

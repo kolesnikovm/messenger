@@ -8,7 +8,7 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
-const selectMessages = "select id, sender_id, chat_id, text from messenger.messages where chat_id = $1 and id < $2 order by id desc limit $3"
+const selectMessages = "select id, sender_id, chat_id, text from messages where chat_id = $1 and id < $2 order by id desc limit $3"
 
 func (m *Messages) GetMessageHistory(ctx context.Context, fromMessageID ulid.ULID, chatID string) ([]*entity.Message, error) {
 	const op = "Messages.GetMessageHistory"

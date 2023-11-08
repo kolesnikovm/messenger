@@ -24,6 +24,7 @@ var cmdDown = &cobra.Command{
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to create migrations")
 		}
+		defer migrations.Close()
 
 		if err := migrations.Down(); err != nil {
 			log.Fatal().Err(err).Msg("failed to perform down migration")

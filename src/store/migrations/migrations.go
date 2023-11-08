@@ -33,22 +33,6 @@ func New(postgres *postgres.DB) (*Migrations, error) {
 	}, nil
 }
 
-func (m *Migrations) Up() error {
-	const op = "Migrations.Up"
-
-	if err := goose.Up(m.DB, "sql"); err != nil {
-		return fmt.Errorf("%s: %w", op, err)
-	}
-
-	return nil
-}
-
-func (m *Migrations) Down() error {
-	const op = "Migrations.Down"
-
-	if err := goose.Down(m.DB, "sql"); err != nil {
-		return fmt.Errorf("%s: %w", op, err)
-	}
-
-	return nil
+func (m *Migrations) Close() {
+	m.DB.Close()
 }

@@ -16,12 +16,7 @@ func (h *Handler) GetMessage(msgRequest *proto.MessaggeRequest, stream proto.Mes
 	for {
 		select {
 		case message := <-messageCh:
-			protoMsg := &proto.Message{
-				MessageID:   message.MessageID.String(),
-				SenderID:    message.SenderID,
-				RecipientID: message.RecipientID,
-				Text:        message.Text,
-			}
+			protoMsg := convertEntityToPb(message)
 
 			if err := stream.Send(protoMsg); err != nil {
 				return err

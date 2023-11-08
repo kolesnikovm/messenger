@@ -19,7 +19,7 @@ func (s *Handler) SendMessage(stream proto.Messenger_SendMessageServer) error {
 			return err
 		}
 
-		m, err := s.transformMessageRPC(message)
+		m, err := convertPbToEntity(message)
 		if err != nil {
 			return err
 		}

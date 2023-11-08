@@ -21,15 +21,15 @@ func NewHandler(usecase usecase.Message) *Handler {
 	}
 }
 
-func (s *Handler) transformMessageRPC(msg *pb.Message) (entity.Message, error) {
-	const op = "Handler.transformMessageRPC"
+func convertPbToEntity(msg *pb.Message) (*entity.Message, error) {
+	const op = "convertPbToEntity"
 
 	messageID, err := ulid.Parse(msg.MessageID)
 	if err != nil {
-		return entity.Message{}, fmt.Errorf("%s: %w", op, err)
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	res := entity.Message{
+	res := &entity.Message{
 		MessageID:   messageID,
 		SenderID:    msg.SenderID,
 		RecipientID: msg.RecipientID,
@@ -37,6 +37,15 @@ func (s *Handler) transformMessageRPC(msg *pb.Message) (entity.Message, error) {
 	}
 
 	return res, nil
+}
+
+func convertEntityToPb(msg *entity.Message) *pb.Message {
+	return &pb.Message{
+		MessageID:   msg.MessageID.String(),
+		SenderID:    msg.SenderID,
+		RecipientID: msg.RecipientID,
+		Text:        msg.Text,
+	}
 }
 
 func GetHeader(md metadata.MD, header string) (uint64, error) {

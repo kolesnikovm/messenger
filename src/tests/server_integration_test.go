@@ -25,7 +25,7 @@ func TestSendMessage(t *testing.T) {
 	defer cleanup()
 
 	messageID := ulid.Make()
-	entityMessage := entity.Message{
+	entityMessage := &entity.Message{
 		MessageID:   messageID,
 		SenderID:    1,
 		RecipientID: 2,
@@ -63,7 +63,7 @@ func TestSendMessageInternalError(t *testing.T) {
 
 	messageID := ulid.Make()
 	notifierError := errors.New("notifier error")
-	suite.messageSender.EXPECT().Send(mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("entity.Message")).Return(notifierError)
+	suite.messageSender.EXPECT().Send(mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*entity.Message")).Return(notifierError)
 
 	ctx := context.Background()
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1")

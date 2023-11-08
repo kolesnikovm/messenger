@@ -16,7 +16,7 @@ type result struct {
 	Error     error
 }
 
-func (k *KafkaMessageSender) Send(ctx context.Context, msg entity.Message) error {
+func (k *KafkaMessageSender) Send(ctx context.Context, msg *entity.Message) error {
 	const op = "KafkaMessageSender.Send"
 
 	payload, err := json.Marshal(&kafkaMessage{

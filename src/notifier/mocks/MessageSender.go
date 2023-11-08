@@ -82,13 +82,13 @@ func (_c *MockMessageSender_Get_Call) RunAndReturn(run func(context.Context, uin
 	return _c
 }
 
-// Send provides a mock function with given fields: _a0, _a1
-func (_m *MockMessageSender) Send(_a0 context.Context, _a1 entity.Message) error {
-	ret := _m.Called(_a0, _a1)
+// Send provides a mock function with given fields: ctx, message
+func (_m *MockMessageSender) Send(ctx context.Context, message *entity.Message) error {
+	ret := _m.Called(ctx, message)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, entity.Message) error); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, *entity.Message) error); ok {
+		r0 = rf(ctx, message)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -102,15 +102,15 @@ type MockMessageSender_Send_Call struct {
 }
 
 // Send is a helper method to define mock.On call
-//   - _a0 context.Context
-//   - _a1 entity.Message
-func (_e *MockMessageSender_Expecter) Send(_a0 interface{}, _a1 interface{}) *MockMessageSender_Send_Call {
-	return &MockMessageSender_Send_Call{Call: _e.mock.On("Send", _a0, _a1)}
+//   - ctx context.Context
+//   - message *entity.Message
+func (_e *MockMessageSender_Expecter) Send(ctx interface{}, message interface{}) *MockMessageSender_Send_Call {
+	return &MockMessageSender_Send_Call{Call: _e.mock.On("Send", ctx, message)}
 }
 
-func (_c *MockMessageSender_Send_Call) Run(run func(_a0 context.Context, _a1 entity.Message)) *MockMessageSender_Send_Call {
+func (_c *MockMessageSender_Send_Call) Run(run func(ctx context.Context, message *entity.Message)) *MockMessageSender_Send_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(entity.Message))
+		run(args[0].(context.Context), args[1].(*entity.Message))
 	})
 	return _c
 }
@@ -120,7 +120,7 @@ func (_c *MockMessageSender_Send_Call) Return(_a0 error) *MockMessageSender_Send
 	return _c
 }
 
-func (_c *MockMessageSender_Send_Call) RunAndReturn(run func(context.Context, entity.Message) error) *MockMessageSender_Send_Call {
+func (_c *MockMessageSender_Send_Call) RunAndReturn(run func(context.Context, *entity.Message) error) *MockMessageSender_Send_Call {
 	_c.Call.Return(run)
 	return _c
 }

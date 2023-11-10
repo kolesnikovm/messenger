@@ -4,9 +4,19 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/kolesnikovm/messenger/entity"
 	"github.com/oklog/ulid/v2"
 )
+
+type dbMessageID ulid.ULID
+
+type dbMessage struct {
+	MessageID dbMessageID
+	SenderID  uint64
+	ChatID    string
+	Text      string
+}
 
 const selectMessages = "select id, sender_id, chat_id, text from messages where chat_id = $1 and id < $2 order by id desc limit $3"
 
@@ -24,36 +34,37 @@ func (m *Messages) GetMessageHistory(ctx context.Context, fromMessageID ulid.ULI
 
 	messages := make([]*entity.Message, 0)
 	for rows.Next() {
-		m := &entity.Message{}
+		m := &dbMessage{}
 
-		values, err := rows.Values()
-		if err != nil {
-			return nil, fmt.Errorf("%s: %w", op, err)
-		}
-		if len(values) < 4 {
-			return nil, fmt.Errorf("%s: not enough values in a row: %d", op, len(values))
-		}
-
-		if err := rows.Scan(nil, &m.SenderID, nil, &m.Text); err != nil {
+		if err := rows.Scan(&m.MessageID, &m.SenderID, &m.ChatID, &m.Text); err != nil {
 			return nil, fmt.Errorf("%s: %w", op, err)
 		}
 
-		recipientID, err := getRecipientID(values[2].(string), uint64(values[1].(int64)))
+		message, err := m.getEntityMessage()
 		if err != nil {
 			return nil, err
 		}
-		m.RecipientID = recipientID
 
-		messageIdBytes, ok := values[0].([16]byte)
-		if !ok {
-			return nil, fmt.Errorf("%s: failed to cast message id to bytes", op)
-		}
-		m.MessageID = ulid.ULID(messageIdBytes)
-
-		messages = append(messages, m)
+		messages = append(messages, message)
 	}
 
 	return messages, nil
+}
+
+func (m *dbMessage) getEntityMessage() (*entity.Message, error) {
+	const op = "getEntityMessage"
+
+	recipientID, err := getRecipientID(m.ChatID, m.SenderID)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return &entity.Message{
+		MessageID:   ulid.ULID(m.MessageID),
+		SenderID:    m.SenderID,
+		RecipientID: recipientID,
+		Text:        m.Text,
+	}, nil
 }
 
 func getRecipientID(chatID string, senderID uint64) (uint64, error) {
@@ -67,4 +78,24 @@ func getRecipientID(chatID string, senderID uint64) (uint64, error) {
 	}
 
 	return user1, nil
+}
+
+func (id *dbMessageID) Scan(src interface{}) error {
+	const op = "dbMessageID.Scan"
+
+	switch x := src.(type) {
+	case nil:
+		return nil
+	case string:
+		msgID, err := uuid.Parse(x)
+		if err != nil {
+			return fmt.Errorf("%s: %w", op, err)
+		}
+
+		*id = dbMessageID(msgID)
+
+		return nil
+	}
+
+	return fmt.Errorf("%s: failed to determine interface type", op)
 }

@@ -5,6 +5,7 @@ go 1.21.1
 require (
 	github.com/IBM/sarama v1.41.2
 	github.com/cenkalti/backoff/v4 v4.2.1
+	github.com/google/uuid v1.4.0
 	github.com/google/wire v0.5.0
 	github.com/jackc/pgx/v5 v5.5.0
 	github.com/mitchellh/mapstructure v1.5.0
@@ -28,7 +29,6 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/uuid v1.4.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect

@@ -1,4 +1,4 @@
-package interceptors
+package errors
 
 import (
 	"context"
@@ -12,8 +12,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func NewUnaryInterceptor() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+func UnaryServerInterceptor() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 		userID, err := getUser(ctx)
 		if err != nil {
 			return nil, err
@@ -23,18 +23,41 @@ func NewUnaryInterceptor() grpc.UnaryServerInterceptor {
 
 		resp, err := handler(ctx, req)
 		if err != nil {
-			st, ok := status.FromError(err)
-
-			if !ok || st.Code() == codes.Unknown {
-				log.Error().Err(err).Send()
-
-				return nil, status.Error(codes.Internal, codes.Internal.String())
-			}
-
-			return nil, st.Err()
+			return nil, getError(err)
 		}
 
 		return resp, nil
+	}
+}
+
+type MessengerServerStream struct {
+	grpc.ServerStream
+	ctx context.Context
+}
+
+func (m *MessengerServerStream) Context() context.Context {
+	return m.ctx
+}
+
+func StreamServerInterceptor() grpc.StreamServerInterceptor {
+	return func(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		userID, err := getUser(ss.Context())
+		if err != nil {
+			return err
+		}
+
+		ctx := context.WithValue(ss.Context(), "userID", userID)
+
+		wrapper := &MessengerServerStream{
+			ServerStream: ss,
+			ctx:          ctx,
+		}
+
+		err = handler(srv, wrapper)
+		if err != nil {
+			return getError(err)
+		}
+		return nil
 	}
 }
 
@@ -69,4 +92,16 @@ func getUser(ctx context.Context) (uint64, error) {
 	}
 
 	return userID, nil
+}
+
+func getError(err error) error {
+	st, ok := status.FromError(err)
+
+	if !ok || st.Code() == codes.Unknown {
+		log.Error().Err(err).Send()
+
+		return status.Error(codes.Internal, codes.Internal.String())
+	}
+
+	return st.Err()
 }

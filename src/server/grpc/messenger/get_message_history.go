@@ -27,6 +27,12 @@ func (h *Handler) GetMessageHistory(ctx context.Context, req *proto.HistoryReque
 		return nil, statusError
 	}
 
+	if req.MessageCount == 0 {
+		statusError := composeInvalidArgumentError("HistoryRequest.messageCount", "messageCount must be > 0")
+
+		return nil, statusError
+	}
+
 	user1, user2, err := entity.ParseChatID(req.ChatID)
 	if err != nil {
 		log.Error().Err(err).Send()
@@ -42,7 +48,7 @@ func (h *Handler) GetMessageHistory(ctx context.Context, req *proto.HistoryReque
 		return nil, status.Error(codes.NotFound, "Chat not found")
 	}
 
-	messages, err := h.Usecase.GetHistory(ctx, req.ChatID, messageID, userID)
+	messages, err := h.Usecase.GetHistory(ctx, req.ChatID, messageID, userID, req.MessageCount, req.GetDirection().String())
 	if err != nil {
 		return nil, err
 	}

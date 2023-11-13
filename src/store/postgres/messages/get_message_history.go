@@ -18,13 +18,17 @@ type dbMessage struct {
 	Text      string
 }
 
-const selectMessages = "select id, sender_id, chat_id, text from messages where chat_id = $1 and id < $2 order by id desc limit $3"
+const selectMessagesBackward = "select id, sender_id, chat_id, text from messages where chat_id = $1 and id < $2 order by id desc limit $3"
 
-func (m *Messages) GetMessageHistory(ctx context.Context, fromMessageID ulid.ULID, chatID string) ([]*entity.Message, error) {
+const selectMessagesForward = "select id, sender_id, chat_id, text from messages where chat_id = $1 and id > $2 order by id asc limit $3"
+
+func (m *Messages) GetMessageHistory(ctx context.Context, fromMessageID ulid.ULID, chatID string, messageCount uint32, direction string) ([]*entity.Message, error) {
 	const op = "Messages.GetMessageHistory"
 
-	// TODO add config
-	messageCount := 50
+	selectMessages := selectMessagesBackward
+	if direction == "FORWARD" {
+		selectMessages = selectMessagesForward
+	}
 
 	rows, err := m.DB.Query(ctx, selectMessages, chatID, fromMessageID, messageCount)
 	if err != nil {

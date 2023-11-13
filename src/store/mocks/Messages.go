@@ -67,25 +67,25 @@ func (_c *MockMessages_BatchInsert_Call) RunAndReturn(run func(context.Context, 
 	return _c
 }
 
-// GetMessageHistory provides a mock function with given fields: ctx, fromMessageID, chatID
-func (_m *MockMessages) GetMessageHistory(ctx context.Context, fromMessageID ulid.ULID, chatID string) ([]*entity.Message, error) {
-	ret := _m.Called(ctx, fromMessageID, chatID)
+// GetMessageHistory provides a mock function with given fields: ctx, fromMessageID, chatID, messageCount, direction
+func (_m *MockMessages) GetMessageHistory(ctx context.Context, fromMessageID ulid.ULID, chatID string, messageCount uint32, direction string) ([]*entity.Message, error) {
+	ret := _m.Called(ctx, fromMessageID, chatID, messageCount, direction)
 
 	var r0 []*entity.Message
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, ulid.ULID, string) ([]*entity.Message, error)); ok {
-		return rf(ctx, fromMessageID, chatID)
+	if rf, ok := ret.Get(0).(func(context.Context, ulid.ULID, string, uint32, string) ([]*entity.Message, error)); ok {
+		return rf(ctx, fromMessageID, chatID, messageCount, direction)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, ulid.ULID, string) []*entity.Message); ok {
-		r0 = rf(ctx, fromMessageID, chatID)
+	if rf, ok := ret.Get(0).(func(context.Context, ulid.ULID, string, uint32, string) []*entity.Message); ok {
+		r0 = rf(ctx, fromMessageID, chatID, messageCount, direction)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*entity.Message)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, ulid.ULID, string) error); ok {
-		r1 = rf(ctx, fromMessageID, chatID)
+	if rf, ok := ret.Get(1).(func(context.Context, ulid.ULID, string, uint32, string) error); ok {
+		r1 = rf(ctx, fromMessageID, chatID, messageCount, direction)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -102,13 +102,15 @@ type MockMessages_GetMessageHistory_Call struct {
 //   - ctx context.Context
 //   - fromMessageID ulid.ULID
 //   - chatID string
-func (_e *MockMessages_Expecter) GetMessageHistory(ctx interface{}, fromMessageID interface{}, chatID interface{}) *MockMessages_GetMessageHistory_Call {
-	return &MockMessages_GetMessageHistory_Call{Call: _e.mock.On("GetMessageHistory", ctx, fromMessageID, chatID)}
+//   - messageCount uint32
+//   - direction string
+func (_e *MockMessages_Expecter) GetMessageHistory(ctx interface{}, fromMessageID interface{}, chatID interface{}, messageCount interface{}, direction interface{}) *MockMessages_GetMessageHistory_Call {
+	return &MockMessages_GetMessageHistory_Call{Call: _e.mock.On("GetMessageHistory", ctx, fromMessageID, chatID, messageCount, direction)}
 }
 
-func (_c *MockMessages_GetMessageHistory_Call) Run(run func(ctx context.Context, fromMessageID ulid.ULID, chatID string)) *MockMessages_GetMessageHistory_Call {
+func (_c *MockMessages_GetMessageHistory_Call) Run(run func(ctx context.Context, fromMessageID ulid.ULID, chatID string, messageCount uint32, direction string)) *MockMessages_GetMessageHistory_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(ulid.ULID), args[2].(string))
+		run(args[0].(context.Context), args[1].(ulid.ULID), args[2].(string), args[3].(uint32), args[4].(string))
 	})
 	return _c
 }
@@ -118,7 +120,7 @@ func (_c *MockMessages_GetMessageHistory_Call) Return(_a0 []*entity.Message, _a1
 	return _c
 }
 
-func (_c *MockMessages_GetMessageHistory_Call) RunAndReturn(run func(context.Context, ulid.ULID, string) ([]*entity.Message, error)) *MockMessages_GetMessageHistory_Call {
+func (_c *MockMessages_GetMessageHistory_Call) RunAndReturn(run func(context.Context, ulid.ULID, string, uint32, string) ([]*entity.Message, error)) *MockMessages_GetMessageHistory_Call {
 	_c.Call.Return(run)
 	return _c
 }

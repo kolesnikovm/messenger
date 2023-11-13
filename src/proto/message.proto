@@ -24,6 +24,12 @@ message MessaggeRequest {}
 message HistoryRequest {
     string chatID = 1;
     string messageID = 2;
+    uint32 messageCount = 3;
+    enum Direction {
+        BACKWARD = 0;
+        FORWARD = 1;
+    }
+    Direction direction = 4;
 }
 
 message HistoryResponse {

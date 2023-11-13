@@ -153,11 +153,15 @@ func TestGetMessageHistory(t *testing.T) {
 		RecipientID: 2,
 		Text:        "test",
 	}}
-	suite.messageStore.EXPECT().GetMessageHistory(mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("ulid.ULID"), "1:2").Return(entityMessages, nil)
+	suite.messageStore.EXPECT().GetMessageHistory(mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("ulid.ULID"), "1:2", uint32(50), "BACKWARD").Return(entityMessages, nil)
 
 	ctx := context.Background()
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1")
-	historyResponse, err := suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "1:2", MessageID: ulid.Make().String()})
+	historyResponse, err := suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{
+		ChatID:       "1:2",
+		MessageID:    ulid.Make().String(),
+		MessageCount: 50,
+		Direction:    proto.HistoryRequest_BACKWARD})
 	require.NoErrorf(t, err, "Failed to get mesage history")
 
 	message := historyResponse.Messages[0]
@@ -173,11 +177,15 @@ func TestGetMessageHistoryInternalError(t *testing.T) {
 	defer cleanup()
 
 	storeError := errors.New("store error")
-	suite.messageStore.EXPECT().GetMessageHistory(mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("ulid.ULID"), "1:2").Return(nil, storeError)
+	suite.messageStore.EXPECT().GetMessageHistory(mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("ulid.ULID"), "1:2", uint32(50), "BACKWARD").Return(nil, storeError)
 
 	ctx := context.Background()
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1")
-	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "1:2", MessageID: ulid.Make().String()})
+	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{
+		ChatID:       "1:2",
+		MessageID:    ulid.Make().String(),
+		MessageCount: 50,
+		Direction:    proto.HistoryRequest_BACKWARD})
 	require.EqualError(t, err, "rpc error: code = Internal desc = Internal")
 }
 
@@ -190,7 +198,11 @@ func TestGetMessageHistoryAuthError(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "1:2", MessageID: ulid.Make().String()})
+	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{
+		ChatID:       "1:2",
+		MessageID:    ulid.Make().String(),
+		MessageCount: 50,
+		Direction:    proto.HistoryRequest_BACKWARD})
 	require.EqualError(t, err, "rpc error: code = Unauthenticated desc = Unauthenticated")
 
 	st, ok := status.FromError(err)
@@ -210,7 +222,11 @@ func TestGetMessageHistoryArgumentError(t *testing.T) {
 
 	ctx := context.Background()
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1")
-	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "", MessageID: ulid.Make().String()})
+	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{
+		ChatID:       "",
+		MessageID:    ulid.Make().String(),
+		MessageCount: 50,
+		Direction:    proto.HistoryRequest_BACKWARD})
 	require.EqualError(t, err, "rpc error: code = InvalidArgument desc = InvalidArgument")
 
 	st, ok := status.FromError(err)
@@ -220,7 +236,11 @@ func TestGetMessageHistoryArgumentError(t *testing.T) {
 	require.Equal(t, "failed to parse chat id from: ", details.FieldViolations[0].Description)
 
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "")
-	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "1:2", MessageID: ""})
+	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{
+		ChatID:       "1:2",
+		MessageID:    "",
+		MessageCount: 50,
+		Direction:    proto.HistoryRequest_BACKWARD})
 	require.EqualError(t, err, "rpc error: code = InvalidArgument desc = InvalidArgument")
 
 	st, ok = status.FromError(err)
@@ -240,6 +260,10 @@ func TestGetMessageHistoryPermissionError(t *testing.T) {
 
 	ctx := context.Background()
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1")
-	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{ChatID: "2:3", MessageID: ulid.Make().String()})
+	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{
+		ChatID:       "2:3",
+		MessageID:    ulid.Make().String(),
+		MessageCount: 50,
+		Direction:    proto.HistoryRequest_BACKWARD})
 	require.EqualError(t, err, "rpc error: code = NotFound desc = Chat not found")
 }

@@ -16,7 +16,7 @@ import (
 func (h *Handler) GetMessageHistory(ctx context.Context, req *proto.HistoryRequest) (*proto.HistoryResponse, error) {
 	const op = "Handler.GetMessageHistory"
 
-	userID := ctx.Value("userID").(uint64)
+	userID := ctx.Value(StringContextKey("userID")).(uint64)
 
 	messageID, err := ulid.Parse(req.MessageID)
 	if err != nil {

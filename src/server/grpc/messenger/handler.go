@@ -11,6 +11,8 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+type StringContextKey string
+
 type Handler struct {
 	Usecase usecase.Message
 }

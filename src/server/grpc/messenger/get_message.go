@@ -6,7 +6,7 @@ import (
 )
 
 func (h *Handler) GetMessage(msgRequest *proto.MessaggeRequest, stream proto.Messenger_GetMessageServer) error {
-	userID := stream.Context().Value("userID").(uint64)
+	userID := stream.Context().Value(StringContextKey("userID")).(uint64)
 
 	sessionID := ulid.Make()
 

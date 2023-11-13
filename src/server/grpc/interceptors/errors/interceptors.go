@@ -19,7 +19,7 @@ func UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 			return nil, err
 		}
 
-		ctx = context.WithValue(ctx, "userID", userID)
+		ctx = context.WithValue(ctx, messenger.StringContextKey("userID"), userID)
 
 		resp, err := handler(ctx, req)
 		if err != nil {
@@ -46,7 +46,7 @@ func StreamServerInterceptor() grpc.StreamServerInterceptor {
 			return err
 		}
 
-		ctx := context.WithValue(ss.Context(), "userID", userID)
+		ctx := context.WithValue(ss.Context(), messenger.StringContextKey("userID"), userID)
 
 		wrapper := &MessengerServerStream{
 			ServerStream: ss,

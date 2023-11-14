@@ -72,16 +72,37 @@ func (m *dbMessage) getEntityMessage() (*entity.Message, error) {
 }
 
 func getRecipientID(chatID string, senderID uint64) (uint64, error) {
-	user1, user2, err := entity.ParseChatID(chatID)
-	if err != nil {
-		return 0, err
+	const op = "getRecipientID"
+
+	switch entity.GetChatType(chatID) {
+	case entity.Group:
+		groupID, err := entity.GetGroupID(chatID)
+		if err != nil {
+			return 0, err
+		}
+
+		return groupID, nil
+	case entity.Channel:
+		channelID, err := entity.GetChannelID(chatID)
+		if err != nil {
+			return 0, err
+		}
+
+		return channelID, nil
+	case entity.P2P:
+		user1, user2, err := entity.GetUserIDs(chatID)
+		if err != nil {
+			return 0, err
+		}
+
+		if user1 == senderID {
+			return user2, nil
+		}
+
+		return user1, nil
 	}
 
-	if user1 == senderID {
-		return user2, nil
-	}
-
-	return user1, nil
+	return 0, fmt.Errorf("%s: failed to determine recipient id", op)
 }
 
 func (id *dbMessageID) Scan(src interface{}) error {

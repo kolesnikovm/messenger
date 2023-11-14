@@ -9,6 +9,12 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
+const (
+	Group   = "Group"
+	Channel = "Channel"
+	P2P     = "P2P"
+)
+
 type Message struct {
 	MessageID   ulid.ULID
 	SenderID    uint64
@@ -17,6 +23,31 @@ type Message struct {
 }
 
 func (m *Message) GetChatID() string {
+	var chatID string
+
+	switch {
+	case isGroup(m.RecipientID):
+		chatID = m.getGroupID()
+	case isChannel(m.RecipientID):
+		chatID = m.getChannelID()
+	default:
+		chatID = m.getP2PID()
+	}
+
+	return chatID
+}
+
+// TODO implement for groups
+func isGroup(id uint64) bool {
+	return false
+}
+
+// TODO implement for groups
+func isChannel(id uint64) bool {
+	return false
+}
+
+func (m *Message) getP2PID() string {
 	slice := []uint64{m.SenderID, m.RecipientID}
 	sort.SliceStable(slice, func(i, j int) bool { return slice[i] < slice[j] })
 
@@ -28,24 +59,74 @@ func (m *Message) GetChatID() string {
 	return strings.Join(stringSlice, ":")
 }
 
-func ParseChatID(chatID string) (user1 uint64, user2 uint64, err error) {
-	const op = "entity.ParseChatID"
+func (m *Message) getGroupID() string {
+	return fmt.Sprintf("g:%d", m.RecipientID)
+}
 
-	chatParticipants := strings.Split(chatID, ":")
+func (m *Message) getChannelID() string {
+	return fmt.Sprintf("c:%d", m.RecipientID)
+}
 
-	if len(chatParticipants) != 2 {
-		return 0, 0, fmt.Errorf("%s: failed to get chat participants from chat id: %s", op, chatID)
+func GetChatType(chatID string) string {
+	switch {
+	case strings.HasPrefix(chatID, "g:"):
+		return Group
+	case strings.HasPrefix(chatID, "c:"):
+		return Channel
+	default:
+		return P2P
+	}
+}
+
+func GetGroupID(chatID string) (uint64, error) {
+	const op = "GetGroupID"
+
+	tokens := strings.Split(chatID, ":")
+	if len(tokens) != 2 {
+		return 0, fmt.Errorf("%s: failed to get group id from chat id: %s", op, chatID)
 	}
 
-	user1, err = strconv.ParseUint(chatParticipants[0], 10, 64)
+	groupID, err := strconv.ParseUint(tokens[1], 10, 64)
 	if err != nil {
-		return 0, 0, fmt.Errorf("%s: failed to parse user id from: %s", op, chatParticipants[0])
+		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
-	user2, err = strconv.ParseUint(chatParticipants[1], 10, 64)
+	return groupID, nil
+}
+
+func GetChannelID(chatID string) (uint64, error) {
+	const op = "GetChannelID"
+
+	tokens := strings.Split(chatID, ":")
+	if len(tokens) != 2 {
+		return 0, fmt.Errorf("%s: failed to get channel id from chat id: %s", op, chatID)
+	}
+
+	channelID, err := strconv.ParseUint(tokens[1], 10, 64)
 	if err != nil {
-		return 0, 0, fmt.Errorf("%s: failed to parse user id from: %s", op, chatParticipants[1])
+		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return user1, user2, nil
+	return channelID, nil
+}
+
+func GetUserIDs(chatID string) (uint64, uint64, error) {
+	const op = "GetUserIDs"
+
+	tokens := strings.Split(chatID, ":")
+	if len(tokens) != 2 {
+		return 0, 0, fmt.Errorf("%s: failed to get user ids from chat id: %s", op, chatID)
+	}
+
+	userID1, err := strconv.ParseUint(tokens[0], 10, 64)
+	if err != nil {
+		return 0, 0, fmt.Errorf("%s: %w", op, err)
+	}
+
+	userID2, err := strconv.ParseUint(tokens[1], 10, 64)
+	if err != nil {
+		return 0, 0, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return userID1, userID2, nil
 }

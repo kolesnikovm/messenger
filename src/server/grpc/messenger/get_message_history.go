@@ -33,19 +33,8 @@ func (h *Handler) GetMessageHistory(ctx context.Context, req *proto.HistoryReque
 		return nil, statusError
 	}
 
-	user1, user2, err := entity.ParseChatID(req.ChatID)
-	if err != nil {
-		log.Error().Err(err).Send()
-
-		statusError := composeInvalidArgumentError("HistoryRequest.chatID", fmt.Sprintf("failed to parse chat id from: %s", req.ChatID))
-
-		return nil, statusError
-	}
-
-	if user1 != userID && user2 != userID {
-		log.Error().Msgf("%s: permission denied for user %d on chat %s", op, userID, req.ChatID)
-
-		return nil, status.Error(codes.NotFound, "Chat not found")
+	if err := checkPermission(userID, req.ChatID); err != nil {
+		return nil, err
 	}
 
 	messages, err := h.Usecase.GetHistory(ctx, req.ChatID, messageID, userID, req.MessageCount, req.GetDirection().String())
@@ -80,4 +69,74 @@ func composeInvalidArgumentError(agrument string, details string) error {
 	}
 
 	return st.Err()
+}
+
+func checkPermission(userID uint64, chatID string) error {
+	const op = "Handler.checkPermission"
+
+	switch entity.GetChatType(chatID) {
+	case entity.Group:
+		groupID, err := entity.GetGroupID(chatID)
+		if err != nil {
+			log.Error().Err(err).Send()
+
+			statusError := composeInvalidArgumentError("HistoryRequest.chatID", fmt.Sprintf("failed to parse group id from: %s", chatID))
+
+			return statusError
+		}
+
+		if !isGroupMember(userID, groupID) {
+			log.Error().Msgf("%s: permission denied for user %d on group %d", op, userID, groupID)
+
+			return status.Error(codes.NotFound, "Chat not found")
+		}
+	case entity.Channel:
+		channelID, err := entity.GetChannelID(chatID)
+		if err != nil {
+			log.Error().Err(err).Send()
+
+			statusError := composeInvalidArgumentError("HistoryRequest.chatID", fmt.Sprintf("failed to parse channel id from: %s", chatID))
+
+			return statusError
+		}
+
+		if !isChannelMember(userID, channelID) {
+			log.Error().Msgf("%s: permission denied for user %d on channel %d", op, userID, channelID)
+
+			return status.Error(codes.NotFound, "Chat not found")
+		}
+	case entity.P2P:
+		user1, user2, err := entity.GetUserIDs(chatID)
+		if err != nil {
+			log.Error().Err(err).Send()
+
+			statusError := composeInvalidArgumentError("HistoryRequest.chatID", fmt.Sprintf("failed to parse user ids from: %s", chatID))
+
+			return statusError
+		}
+
+		if user1 != userID && user2 != userID {
+			log.Error().Msgf("%s: permission denied for user %d on chat %s", op, userID, chatID)
+
+			return status.Error(codes.NotFound, "Chat not found")
+		}
+	default:
+		log.Error().Msgf("%s: failed to get chat type from: %s", op, chatID)
+
+		statusError := composeInvalidArgumentError("HistoryRequest.chatID", fmt.Sprintf("failed to get chat type from: %s", chatID))
+
+		return statusError
+	}
+
+	return nil
+}
+
+// TODO implemen for groups
+func isGroupMember(userID, groupID uint64) bool {
+	return false
+}
+
+// TODO implemen for groups
+func isChannelMember(userID, groupID uint64) bool {
+	return false
 }

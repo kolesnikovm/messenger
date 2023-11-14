@@ -233,7 +233,7 @@ func TestGetMessageHistoryArgumentError(t *testing.T) {
 	require.Equal(t, true, ok)
 
 	details := st.Details()[0].(*errdetails.BadRequest)
-	require.Equal(t, "failed to parse chat id from: ", details.FieldViolations[0].Description)
+	require.Equal(t, "failed to parse user ids from: ", details.FieldViolations[0].Description)
 
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "")
 	_, err = suite.messengerServiceClient.GetMessageHistory(ctx, &proto.HistoryRequest{

@@ -2,7 +2,6 @@ package migrations
 
 import (
 	"database/sql"
-	"embed"
 	"fmt"
 
 	"github.com/jackc/pgx/v5/stdlib"
@@ -10,8 +9,7 @@ import (
 	"github.com/pressly/goose/v3"
 )
 
-//go:embed sql/*.sql
-var embedMigrations embed.FS
+const migrationsDir = "."
 
 type Migrations struct {
 	DB *sql.DB
@@ -19,8 +17,6 @@ type Migrations struct {
 
 func New(postgres *postgres.DB) (*Migrations, error) {
 	const op = "migrations.New"
-
-	goose.SetBaseFS(embedMigrations)
 
 	if err := goose.SetDialect("postgres"); err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
@@ -35,4 +31,15 @@ func New(postgres *postgres.DB) (*Migrations, error) {
 
 func (m *Migrations) Close() {
 	m.DB.Close()
+}
+
+func (m *Migrations) Run(command string, args ...string) error {
+	const op = "migrations.Run"
+
+	err := goose.Run(command, m.DB, migrationsDir, args...)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	return nil
 }

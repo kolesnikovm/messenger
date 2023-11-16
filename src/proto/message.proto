@@ -15,9 +15,7 @@ message Message {
     string text = 4;
 }
 
-message Status {
-    int32 errorCount = 1;
-}
+message Status {}
 
 message MessaggeRequest {}
 

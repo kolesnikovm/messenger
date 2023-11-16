@@ -41,7 +41,7 @@ jobs:
 
       - name: Setup DB
         working-directory: src
-        run: messenger migrations up
+        run: ./messenger migrations up
 
       - name: Test
         working-directory: src

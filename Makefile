@@ -19,3 +19,7 @@ mockery:
 .PHONY: test
 test:
 	cd src; go test -race ./...
+
+.PHONY: lint
+lint:
+	cd src; golangci-lint run ./...

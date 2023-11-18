@@ -13,6 +13,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const maxMessageCount = 1_000
+
 func (h *Handler) GetMessageHistory(ctx context.Context, req *proto.HistoryRequest) (*proto.HistoryResponse, error) {
 	const op = "Handler.GetMessageHistory"
 
@@ -27,8 +29,8 @@ func (h *Handler) GetMessageHistory(ctx context.Context, req *proto.HistoryReque
 		return nil, statusError
 	}
 
-	if req.MessageCount == 0 {
-		statusError := composeInvalidArgumentError("HistoryRequest.messageCount", "messageCount must be > 0")
+	if req.MessageCount == 0 || req.MessageCount > maxMessageCount {
+		statusError := composeInvalidArgumentError("HistoryRequest.messageCount", fmt.Sprintf("messageCount must be in (0, %d]", maxMessageCount))
 
 		return nil, statusError
 	}

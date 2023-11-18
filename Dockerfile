@@ -2,19 +2,25 @@ FROM golang:1.21.1-alpine AS builder
 
 WORKDIR /app
 
-COPY src/go.mod ./
+RUN go env -w GOMODCACHE=/root/.cache/go-build
 
-RUN go mod download
+COPY src/go.mod src/go.sum ./
+
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    go mod download
 
 COPY src/ ./
 
 RUN go build -o app
 
+FROM alpine:3.18.4
+
+RUN apk update && apk upgrade
+
+RUN rm -rf /var/cache/apk/* && \
+    rm -rf /tmp/*
+
 RUN adduser -D appuser
-
-FROM scratch
-
-COPY --from=builder /etc/passwd /etc/passwd
 
 USER appuser
 

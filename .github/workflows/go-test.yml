@@ -6,14 +6,14 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    container: alpine:3.18.4
+
     services:
       postgres:
         image: postgres:latest
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: messenger
-        ports:
-          - 5432:5432
       kafka:
         image: 'bitnami/kafka:latest'
         env:
@@ -21,12 +21,10 @@ jobs:
           KAFKA_CFG_PROCESS_ROLES: broker,controller
           KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
           KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
-          KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
-          KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
-          KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
-        ports:
-          - 9092:9092
-          - 9094:9094
+          KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+          KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+          KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+
     steps:
       - uses: actions/checkout@v4
 
@@ -42,7 +40,13 @@ jobs:
       - name: Setup DB
         working-directory: src
         run: ./messenger migrations up
+        env:
+          POSTGRES_URL: postgres://postgres:postgres@postgres:5432/messenger
+          KAFKA_BROKER_LIST: kafka:9092
 
       - name: Test
         working-directory: src
         run: go test -race ./...
+        env:
+          POSTGRES_URL: postgres://postgres:postgres@postgres:5432/messenger
+          KAFKA_BROKER_LIST: kafka:9092

@@ -18,6 +18,7 @@ mockery:
 
 .PHONY: test
 test:
+	go clean -testcache
 	cd src; go test -race ./...
 
 .PHONY: lint

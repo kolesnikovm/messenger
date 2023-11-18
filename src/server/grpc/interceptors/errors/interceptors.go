@@ -83,7 +83,7 @@ func getUser(ctx context.Context) (uint64, error) {
 
 		st, err := st.WithDetails(br)
 		if err != nil {
-			log.Error().Err(err).Str("op", op).Send()
+			log.Error().Err(err).Msgf("%s: error calling status.WithDetails", op)
 
 			return 0, status.Error(codes.Internal, codes.Internal.String())
 		}

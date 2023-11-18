@@ -22,7 +22,7 @@ func newViper() *viper.Viper {
 
 	vp.SetDefault("listen_port", "9101")
 
-	vp.SetDefault("kafka_config.broker_list", "localhost:9094")
+	vp.SetDefault("kafka.broker_list", "localhost:9094")
 
 	vp.SetDefault("archiver.batch_size", 10)
 	vp.SetDefault("archiver.num_senders", 4)
@@ -58,15 +58,15 @@ type Archiver struct {
 	FlushInterval time.Duration `mapstructure:"flush_interval"`
 }
 
-type KafkaConfig struct {
+type Kafka struct {
 	BrokerList []string `mapstructure:"broker_list"`
 }
 
 type ServerConfig struct {
-	ListenPort  int         `mapstructure:"listen_port"`
-	KafkaConfig KafkaConfig `mapstructure:"kafka_config"`
-	Archiver    Archiver    `mapstructure:"archiver"`
-	Postgres    Postgres    `mapstructure:"postgres"`
+	ListenPort int      `mapstructure:"listen_port"`
+	Kafka      Kafka    `mapstructure:"kafka"`
+	Archiver   Archiver `mapstructure:"archiver"`
+	Postgres   Postgres `mapstructure:"postgres"`
 }
 
 type ClientConfig struct {

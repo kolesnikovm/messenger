@@ -14,7 +14,7 @@ func TestGet(t *testing.T) {
 	config, err := configs.NewServerConfig("")
 	require.NoError(t, err)
 
-	kafkaMessageSender, err := New(config.KafkaConfig)
+	kafkaMessageSender, err := New(config.Kafka)
 	require.NoError(t, err)
 
 	ctx, cancel := context.WithCancel(context.Background())

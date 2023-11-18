@@ -20,7 +20,7 @@ type KafkaMessageSender struct {
 	Consumer           sarama.Consumer
 	PartitionConsumers map[int32]sarama.PartitionConsumer
 	StreamHub          *hub.StreamHub
-	Config             configs.KafkaConfig
+	Config             configs.Kafka
 }
 
 type kafkaMessage struct {
@@ -32,7 +32,7 @@ type kafkaMessage struct {
 
 const messageTopic = "messages"
 
-func New(conf configs.KafkaConfig) (*KafkaMessageSender, error) {
+func New(conf configs.Kafka) (*KafkaMessageSender, error) {
 	const op = "KafkaMessageSender.New"
 
 	config := sarama.NewConfig()

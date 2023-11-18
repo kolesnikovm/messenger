@@ -23,7 +23,7 @@ func TestFlush(t *testing.T) {
 
 	messageStore := messages.New(db, config.Postgres)
 
-	messageArchiver, err := kafka.New(config.KafkaConfig, config.Archiver, messageStore)
+	messageArchiver, err := kafka.New(config.Kafka, config.Archiver, messageStore)
 	require.NoError(t, err)
 
 	message1 := &entity.Message{
@@ -61,7 +61,7 @@ func TestGetHistoryForward(t *testing.T) {
 
 	messageStore := messages.New(db, config.Postgres)
 
-	messageArchiver, err := kafka.New(config.KafkaConfig, config.Archiver, messageStore)
+	messageArchiver, err := kafka.New(config.Kafka, config.Archiver, messageStore)
 	require.NoError(t, err)
 
 	message1 := &entity.Message{

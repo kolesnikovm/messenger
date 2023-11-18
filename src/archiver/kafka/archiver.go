@@ -21,7 +21,7 @@ const (
 	messageTopic  = "messages"
 )
 
-func New(kafkaConfig configs.KafkaConfig, archiverConfig configs.Archiver, messageStore store.Messages) (*Archiver, error) {
+func New(kafkaConfig configs.Kafka, archiverConfig configs.Archiver, messageStore store.Messages) (*Archiver, error) {
 	const op = "Archiver.New"
 
 	consumerConfig := sarama.NewConfig()

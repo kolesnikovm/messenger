@@ -9,26 +9,50 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
+type ChatType int
+
 const (
-	Group   = "Group"
-	Channel = "Channel"
-	P2P     = "P2P"
+	Group ChatType = iota
+	Channel
+	P2P
 )
 
 type Message struct {
 	MessageID   ulid.ULID
 	SenderID    uint64
 	RecipientID uint64
+	chatType    ChatType
 	Text        string
+}
+
+func NewMessage(messageID ulid.ULID, senderID, recipientID uint64, text string) *Message {
+	var chatType ChatType
+
+	switch {
+	case isGroup(recipientID):
+		chatType = Group
+	case isChannel(recipientID):
+		chatType = Channel
+	default:
+		chatType = P2P
+	}
+
+	return &Message{
+		MessageID:   messageID,
+		SenderID:    senderID,
+		RecipientID: recipientID,
+		chatType:    chatType,
+		Text:        text,
+	}
 }
 
 func (m *Message) GetChatID() string {
 	var chatID string
 
-	switch {
-	case isGroup(m.RecipientID):
+	switch m.chatType {
+	case Group:
 		chatID = m.getGroupID()
-	case isChannel(m.RecipientID):
+	case Channel:
 		chatID = m.getChannelID()
 	default:
 		chatID = m.getP2PID()
@@ -67,7 +91,7 @@ func (m *Message) getChannelID() string {
 	return fmt.Sprintf("c:%d", m.RecipientID)
 }
 
-func GetChatType(chatID string) string {
+func GetChatType(chatID string) ChatType {
 	switch {
 	case strings.HasPrefix(chatID, "g:"):
 		return Group

@@ -26,19 +26,10 @@ func TestFlush(t *testing.T) {
 	messageArchiver, err := kafka.New(config.Kafka, config.Archiver, messageStore)
 	require.NoError(t, err)
 
-	message1 := &entity.Message{
-		MessageID:   ulid.Make(),
-		SenderID:    1,
-		RecipientID: 2,
-		Text:        "test",
-	}
+	message1 := entity.NewMessage(ulid.Make(), 1, 2, "test")
+
 	time.Sleep(1 * time.Second)
-	message2 := &entity.Message{
-		MessageID:   ulid.Make(),
-		SenderID:    1,
-		RecipientID: 2,
-		Text:        "test",
-	}
+	message2 := entity.NewMessage(ulid.Make(), 1, 2, "test")
 	messages := []*entity.Message{message1, message2}
 
 	ctx := context.Background()
@@ -64,19 +55,9 @@ func TestGetHistoryForward(t *testing.T) {
 	messageArchiver, err := kafka.New(config.Kafka, config.Archiver, messageStore)
 	require.NoError(t, err)
 
-	message1 := &entity.Message{
-		MessageID:   ulid.Make(),
-		SenderID:    1,
-		RecipientID: 2,
-		Text:        "test",
-	}
+	message1 := entity.NewMessage(ulid.Make(), 1, 2, "test")
 	time.Sleep(1 * time.Second)
-	message2 := &entity.Message{
-		MessageID:   ulid.Make(),
-		SenderID:    1,
-		RecipientID: 2,
-		Text:        "test",
-	}
+	message2 := entity.NewMessage(ulid.Make(), 1, 2, "test")
 	messages := []*entity.Message{message1, message2}
 
 	ctx := context.Background()

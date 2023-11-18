@@ -21,12 +21,7 @@ func TestGet(t *testing.T) {
 	sessionID := ulid.Make()
 	readCh, cleanup := kafkaMessageSender.Get(ctx, uint64(1), sessionID)
 
-	entityMessage := &entity.Message{
-		MessageID:   ulid.Make(),
-		SenderID:    1,
-		RecipientID: 2,
-		Text:        "test",
-	}
+	entityMessage := entity.NewMessage(ulid.Make(), 1, 2, "test")
 
 	go func() {
 		userStreams := kafkaMessageSender.StreamHub.GetStreams(uint64(1))

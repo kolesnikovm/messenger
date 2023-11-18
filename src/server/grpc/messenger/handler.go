@@ -31,12 +31,12 @@ func convertPbToEntity(msg *pb.Message) (*entity.Message, error) {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	res := &entity.Message{
-		MessageID:   messageID,
-		SenderID:    msg.SenderID,
-		RecipientID: msg.RecipientID,
-		Text:        msg.Text,
-	}
+	res := entity.NewMessage(
+		messageID,
+		msg.SenderID,
+		msg.RecipientID,
+		msg.Text,
+	)
 
 	return res, nil
 }

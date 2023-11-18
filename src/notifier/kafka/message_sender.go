@@ -149,10 +149,10 @@ func ParseMessage(byteMessage []byte) (*entity.Message, error) {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return &entity.Message{
-		MessageID:   kafkaMessage.MessageID,
-		SenderID:    kafkaMessage.SenderID,
-		RecipientID: kafkaMessage.RecipientID,
-		Text:        kafkaMessage.Text,
-	}, nil
+	return entity.NewMessage(
+		kafkaMessage.MessageID,
+		kafkaMessage.SenderID,
+		kafkaMessage.RecipientID,
+		kafkaMessage.Text,
+	), nil
 }

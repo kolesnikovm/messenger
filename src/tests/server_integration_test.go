@@ -25,12 +25,8 @@ func TestSendMessage(t *testing.T) {
 	defer cleanup()
 
 	messageID := ulid.Make()
-	entityMessage := &entity.Message{
-		MessageID:   messageID,
-		SenderID:    1,
-		RecipientID: 2,
-		Text:        "test",
-	}
+	entityMessage := entity.NewMessage(messageID, 1, 2, "test")
+
 	suite.messageSender.EXPECT().Send(mock.AnythingOfType("*context.valueCtx"), entityMessage).Return(nil)
 
 	ctx := context.Background()
@@ -117,12 +113,9 @@ func TestGetMessage(t *testing.T) {
 	defer cleanup()
 
 	messageID := ulid.Make()
-	entityMessage := &entity.Message{
-		MessageID:   messageID,
-		SenderID:    1,
-		RecipientID: 2,
-		Text:        "test",
-	}
+	entity.NewMessage(messageID, 1, 2, "test")
+
+	entityMessage := entity.NewMessage(messageID, 1, 2, "test")
 
 	messageCh := make(chan *entity.Message, 1)
 	messageCh <- entityMessage

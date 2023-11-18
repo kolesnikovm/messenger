@@ -64,12 +64,12 @@ func (m *dbMessage) getEntityMessage() (*entity.Message, error) {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return &entity.Message{
-		MessageID:   ulid.ULID(m.MessageID),
-		SenderID:    m.SenderID,
-		RecipientID: recipientID,
-		Text:        m.Text,
-	}, nil
+	return entity.NewMessage(
+		ulid.ULID(m.MessageID),
+		m.SenderID,
+		recipientID,
+		m.Text,
+	), nil
 }
 
 func getRecipientID(chatID string, senderID uint64) (uint64, error) {

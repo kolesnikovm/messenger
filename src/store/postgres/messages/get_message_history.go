@@ -18,9 +18,10 @@ type dbMessage struct {
 	Text      string
 }
 
-const selectMessagesBackward = "select id, sender_id, chat_id, text from messages where chat_id = $1 and id < $2 order by id desc limit $3"
-
-const selectMessagesForward = "select id, sender_id, chat_id, text from messages where chat_id = $1 and id > $2 order by id asc limit $3"
+const (
+	selectMessagesBackward = "select id, sender_id, chat_id, text from messages where chat_id = $1 and id < $2 order by id desc limit $3"
+	selectMessagesForward  = "select id, sender_id, chat_id, text from messages where chat_id = $1 and id > $2 order by id asc  limit $3"
+)
 
 func (m *Messages) GetMessageHistory(ctx context.Context, fromMessageID ulid.ULID, chatID string, messageCount uint32, direction string) ([]*entity.Message, error) {
 	const op = "Messages.GetMessageHistory"

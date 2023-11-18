@@ -30,7 +30,7 @@ jobs:
 
       - name: Build
         working-directory: src
-        run: go build -o messenger
+        run: go build -o messenger -buildvcs=false
 
       - name: Setup DB
         working-directory: src

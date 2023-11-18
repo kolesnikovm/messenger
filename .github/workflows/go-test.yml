@@ -6,7 +6,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    container: alpine:3.18.4
+    container: golang:1.21.1
 
     services:
       postgres:
@@ -28,12 +28,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version-file: 'src/go.mod'
-          cache-dependency-path: 'src/go.sum'
-
       - name: Build
         working-directory: src
         run: go build -o messenger
@@ -51,4 +45,3 @@ jobs:
         env:
           POSTGRES_URL: postgres://postgres:postgres@postgres:5432/messenger
           KAFKA_BROKER_LIST: kafka:9092
-          CGO_ENABLED: 1

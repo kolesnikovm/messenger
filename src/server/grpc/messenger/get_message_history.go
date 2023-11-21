@@ -16,8 +16,6 @@ import (
 const maxMessageCount = 1_000
 
 func (h *Handler) GetMessageHistory(ctx context.Context, req *proto.HistoryRequest) (*proto.HistoryResponse, error) {
-	const op = "Handler.GetMessageHistory"
-
 	userID := ctx.Value(StringContextKey("userID")).(uint64)
 
 	messageID, err := ulid.Parse(req.MessageID)

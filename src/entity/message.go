@@ -9,12 +9,12 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
-type ChatType int
+type ChatType string
 
 const (
-	Group ChatType = iota
-	Channel
-	P2P
+	Group   ChatType = "Group"
+	Channel ChatType = "Channel"
+	P2P     ChatType = "P2P"
 )
 
 type Message struct {

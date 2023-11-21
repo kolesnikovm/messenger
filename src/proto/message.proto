@@ -5,17 +5,31 @@ option go_package = "github.com/kolesnikovm/messenger/proto";
 service Messenger {
     rpc SendMessage(stream Message) returns (Status) {}
     rpc GetMessage(MessaggeRequest) returns (stream Message) {}
+    rpc GetMessageHistory(HistoryRequest) returns (HistoryResponse) {}
 }
 
 message Message {
-    bytes  messageID = 1;
+    string messageID = 1;
     uint64 senderID = 2;
     uint64 recipientID = 3;
     string text = 4;
 }
 
-message Status {
-    int32 errorCount = 1;
-}
+message Status {}
 
 message MessaggeRequest {}
+
+message HistoryRequest {
+    string chatID = 1;
+    string messageID = 2;
+    uint32 messageCount = 3;
+    enum Direction {
+        BACKWARD = 0;
+        FORWARD = 1;
+    }
+    Direction direction = 4;
+}
+
+message HistoryResponse {
+    repeated Message messages = 1;
+}

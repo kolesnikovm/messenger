@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/kolesnikovm/messenger/cmd/client"
+	"github.com/kolesnikovm/messenger/cmd/migrations"
 	"github.com/kolesnikovm/messenger/cmd/server"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -25,6 +26,7 @@ func init() {
 	rootCmd.AddCommand(
 		server.Cmd,
 		client.Cmd,
+		migrations.Cmd,
 	)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./messenger.yaml)")

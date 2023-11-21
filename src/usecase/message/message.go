@@ -2,14 +2,10 @@ package message
 
 import (
 	"github.com/kolesnikovm/messenger/notifier"
+	"github.com/kolesnikovm/messenger/store"
 )
 
 type MessageUseCase struct {
-	messageSender notifier.MessageSender
-}
-
-func New(messageSender notifier.MessageSender) *MessageUseCase {
-	return &MessageUseCase{
-		messageSender: messageSender,
-	}
+	MessageSender notifier.MessageSender
+	MessageStore  store.Messages
 }

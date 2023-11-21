@@ -20,7 +20,7 @@ type KafkaMessageSender struct {
 	Consumer           sarama.Consumer
 	PartitionConsumers map[int32]sarama.PartitionConsumer
 	StreamHub          *hub.StreamHub
-	Config             configs.KafkaConfig
+	Config             configs.Kafka
 }
 
 type kafkaMessage struct {
@@ -32,7 +32,7 @@ type kafkaMessage struct {
 
 const messageTopic = "messages"
 
-func New(conf configs.KafkaConfig) (*KafkaMessageSender, error) {
+func New(conf configs.Kafka) (*KafkaMessageSender, error) {
 	const op = "KafkaMessageSender.New"
 
 	config := sarama.NewConfig()
@@ -149,10 +149,10 @@ func ParseMessage(byteMessage []byte) (*entity.Message, error) {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return &entity.Message{
-		MessageID:   kafkaMessage.MessageID,
-		SenderID:    kafkaMessage.SenderID,
-		RecipientID: kafkaMessage.RecipientID,
-		Text:        kafkaMessage.Text,
-	}, nil
+	return entity.NewMessage(
+		kafkaMessage.MessageID,
+		kafkaMessage.SenderID,
+		kafkaMessage.RecipientID,
+		kafkaMessage.Text,
+	), nil
 }

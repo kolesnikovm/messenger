@@ -8,7 +8,7 @@ import (
 )
 
 func (m *MessageUseCase) Get(ctx context.Context, userID uint64, sessionID ulid.ULID) (<-chan *entity.Message, func()) {
-	messageCh, cleanup := m.messageSender.Get(ctx, userID, sessionID)
+	messageCh, cleanup := m.MessageSender.Get(ctx, userID, sessionID)
 
 	return messageCh, cleanup
 }

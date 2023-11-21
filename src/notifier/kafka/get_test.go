@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"sync/atomic"
 	"testing"
 
 	"github.com/kolesnikovm/messenger/configs"
@@ -14,23 +15,21 @@ func TestGet(t *testing.T) {
 	config, err := configs.NewServerConfig("")
 	require.NoError(t, err)
 
-	kafkaMessageSender, err := New(config.KafkaConfig)
+	kafkaMessageSender, err := New(config.Kafka)
 	require.NoError(t, err)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	sessionID := ulid.Make()
 	readCh, cleanup := kafkaMessageSender.Get(ctx, uint64(1), sessionID)
 
-	entityMessage := &entity.Message{
-		MessageID:   ulid.Make(),
-		SenderID:    1,
-		RecipientID: 2,
-		Text:        "test",
-	}
+	entityMessage := entity.NewMessage(ulid.Make(), 1, 2, "test")
+
+	var streamCount atomic.Int32
+	streamCount.Add(1)
 
 	go func() {
 		userStreams := kafkaMessageSender.StreamHub.GetStreams(uint64(1))
-		require.Equal(t, 1, len(userStreams))
+		require.Equal(t, int(streamCount.Load()), len(userStreams))
 
 		for _, stream := range userStreams {
 			for i := 0; i < 10; i++ {
@@ -50,6 +49,7 @@ func TestGet(t *testing.T) {
 			require.Equal(t, entityMessage, msg)
 		case <-ctx.Done():
 			cleanup()
+			streamCount.Add(-1)
 			return
 		}
 	}

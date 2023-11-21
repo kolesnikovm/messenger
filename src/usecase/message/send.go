@@ -6,8 +6,8 @@ import (
 	"github.com/kolesnikovm/messenger/entity"
 )
 
-func (m *MessageUseCase) Send(ctx context.Context, message entity.Message) error {
-	if err := m.messageSender.Send(ctx, message); err != nil {
+func (m *MessageUseCase) Send(ctx context.Context, message *entity.Message) error {
+	if err := m.MessageSender.Send(ctx, message); err != nil {
 		return err
 	}
 

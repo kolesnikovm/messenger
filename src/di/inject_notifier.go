@@ -7,7 +7,7 @@ import (
 )
 
 func ProvideNotifier(conf configs.ServerConfig) (notifier.MessageSender, func(), error) {
-	messageSender, err := kafka.New(conf.KafkaConfig)
+	messageSender, err := kafka.New(conf.Kafka)
 
 	cleanup := func() {
 		messageSender.Close()

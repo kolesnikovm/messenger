@@ -15,7 +15,6 @@ func ProvideServer(builder grpcServer.ServerBuilder) *grpc.Server {
 var ServerSet = wire.NewSet(
 	messenger.NewHandler,
 	wire.Bind(new(proto.MessengerServer), new(*messenger.Handler)),
-	grpcServer.NewInterceptor,
 	wire.Struct(new(grpcServer.ServerBuilder), "*"),
 	ProvideServer,
 )

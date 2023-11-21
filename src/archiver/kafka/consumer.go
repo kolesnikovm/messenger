@@ -52,7 +52,7 @@ func (c *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim saram
 			messages = append(messages, entityMessage)
 
 			if len(messages) == c.Config.BatchSize {
-				c.sendMessages(context.Background(), messages)
+				c.SendMessages(context.Background(), messages)
 
 				session.MarkMessage(msg, "")
 
@@ -60,7 +60,7 @@ func (c *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim saram
 			}
 		case <-ticker.C:
 			if len(messages) > 0 {
-				c.sendMessages(context.Background(), messages)
+				c.SendMessages(context.Background(), messages)
 			}
 
 			messages = messages[:0]
@@ -70,7 +70,7 @@ func (c *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim saram
 	}
 }
 
-func (c *Consumer) sendMessages(ctx context.Context, messages []*entity.Message) {
+func (c *Consumer) SendMessages(ctx context.Context, messages []*entity.Message) {
 	operation := func() error {
 		return c.MessageStore.BatchInsert(ctx, messages)
 	}

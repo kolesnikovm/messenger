@@ -22,8 +22,6 @@ func (h *Handler) GetMessageHistory(ctx context.Context, req *proto.HistoryReque
 
 	messageID, err := ulid.Parse(req.MessageID)
 	if err != nil {
-		log.Error().Err(err).Str("op", op).Send()
-
 		statusError := composeInvalidArgumentError("HistoryRequest.messageID", fmt.Sprintf("failed to get message id if from: %s", req.MessageID))
 
 		return nil, statusError

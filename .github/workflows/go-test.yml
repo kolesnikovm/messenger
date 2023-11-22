@@ -13,9 +13,8 @@ jobs:
         image: postgres:latest
         env:
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: messenger
         volumes:
-          - ${{ GITHUB_WORKSPACE }}/create_database.sql:/docker-entrypoint-initdb.d/create_database.sql
+          - ${{ github.workspace }}/create_database.sql:/docker-entrypoint-initdb.d/create_database.sql
       kafka:
         image: 'bitnami/kafka:latest'
         env:

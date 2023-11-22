@@ -31,7 +31,7 @@ func (m *Messages) GetMessageHistory(ctx context.Context, fromMessageID ulid.ULI
 		selectMessages = selectMessagesForward
 	}
 
-	rows, err := m.DB.Query(ctx, selectMessages, chatID, fromMessageID, messageCount)
+	rows, err := m.DB.PartitionSet.Get(chatID).Query(ctx, selectMessages, chatID, fromMessageID, messageCount)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}

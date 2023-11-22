@@ -9,12 +9,16 @@ jobs:
     container: golang:1.21.1
 
     services:
-      postgres:
+      postgres1:
         image: postgres:latest
         env:
           POSTGRES_PASSWORD: postgres
-       volumes:
-          - ${{ GITHUB_WORKSPACE }}/create_database.sql:/docker-entrypoint-initdb.d/create_database.sql
+          POSTGRES_DB: messenger
+      postgres2:
+        image: postgres:latest
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: messenger
       kafka:
         image: 'bitnami/kafka:latest'
         env:
@@ -37,12 +41,12 @@ jobs:
         working-directory: src
         run: ./messenger migrations up
         env:
-          POSTGRES_URL: postgres://postgres:postgres@postgres:5432/messenger1,postgres://postgres:postgres@postgres:5432/messenger2
+          POSTGRES_URL: postgres://postgres:postgres@postgres1:5432/messenger,postgres://postgres:postgres@postgres2:5432/messenger
           KAFKA_BROKER_LIST: kafka:9092
 
       - name: Test
         working-directory: src
         run: go test -race ./...
         env:
-          POSTGRES_URL: postgres://postgres:postgres@postgres:5432/messenger1,postgres://postgres:postgres@postgres:5432/messenger2
+          POSTGRES_URL: postgres://postgres:postgres@postgres1:5432/messenger,postgres://postgres:postgres@postgres2:5432/messenger
           KAFKA_BROKER_LIST: kafka:9092

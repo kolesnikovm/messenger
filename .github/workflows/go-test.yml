@@ -38,12 +38,12 @@ jobs:
         working-directory: src
         run: ./messenger migrations up
         env:
-          POSTGRES_URL: postgres://postgres:postgres@postgres:5432/messenger
+          POSTGRES_URL: postgres://postgres:postgres@postgres:5432/messenger1,postgres://postgres:postgres@postgres:5432/messenger2
           KAFKA_BROKER_LIST: kafka:9092
 
       - name: Test
         working-directory: src
         run: go test -race ./...
         env:
-          POSTGRES_URL: postgres://postgres:postgres@postgres:5432/messenger
+          POSTGRES_URL: postgres://postgres:postgres@postgres:5432/messenger1,postgres://postgres:postgres@postgres:5432/messenger2
           KAFKA_BROKER_LIST: kafka:9092

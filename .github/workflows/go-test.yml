@@ -30,10 +30,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Init DB
+      - name: Restart DB
         uses: docker://docker
         with:
           args: docker restart postgres
+
+      - name: Init DB
+        uses: docker://docker
+        with:
+          args: docker exec postgres bash -c "PGPASSWORD=postgres psql -U postgres -f /docker-entrypoint-initdb.d/create_database.sql"
 
       - name: Build
         working-directory: src

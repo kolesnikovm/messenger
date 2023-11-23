@@ -41,7 +41,10 @@ func New(conf configs.Postgres) (*DB, error) {
 		connectionPools = append(connectionPools, pool)
 	}
 
-	partitionSet := partitions.New(connectionPools)
+	partitionSet, err := partitions.New(connectionPools)
+	if err != nil {
+		return nil, err
+	}
 
 	return &DB{
 		PartitionSet: partitionSet,

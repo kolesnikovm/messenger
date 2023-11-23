@@ -15,6 +15,7 @@ jobs:
           POSTGRES_PASSWORD: postgres
         volumes:
           - ${{ github.workspace }}/create_database.sql:/docker-entrypoint-initdb.d/create_database.sql
+        options: --name postgres
       kafka:
         image: 'bitnami/kafka:latest'
         env:
@@ -28,6 +29,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Init DB
+        uses: docker://docker
+        with:
+          args: docker restart postgres
 
       - name: Build
         working-directory: src

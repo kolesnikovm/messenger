@@ -28,7 +28,7 @@ func newViper() *viper.Viper {
 	vp.SetDefault("archiver.num_senders", 4)
 	vp.SetDefault("archiver.flush_interval", 1*time.Second)
 
-	vp.SetDefault("postgres.url", "postgres://postgres:postgres@localhost:5432/messenger")
+	vp.SetDefault("postgres.url", "postgres://postgres:postgres@localhost:5432/messenger1,postgres://postgres:postgres@localhost:5432/messenger2")
 	vp.SetDefault("postgres.max_connections", 10)
 	vp.SetDefault("postgres.max_connection_lifetime", 10*time.Minute)
 
@@ -47,7 +47,7 @@ type Address struct {
 }
 
 type Postgres struct {
-	URL             string        `mapstructure:"url"`
+	URL             []string      `mapstructure:"url"`
 	MaxConns        int32         `mapstructure:"max_connections"`
 	MaxConnLifetime time.Duration `mapstructure:"max_connection_lifetime"`
 }

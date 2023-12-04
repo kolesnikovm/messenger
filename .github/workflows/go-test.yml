@@ -13,7 +13,9 @@ jobs:
         image: postgres:latest
         env:
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: messenger
+        volumes:
+          - ${{ github.workspace }}:/docker-entrypoint-initdb.d/
+        options: --name postgres
       kafka:
         image: 'bitnami/kafka:latest'
         env:
@@ -28,6 +30,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Restart DB
+        uses: docker://docker
+        with:
+          args: docker restart postgres
+
+      - name: Init DB
+        uses: docker://docker
+        with:
+          args: docker exec postgres bash -c "PGPASSWORD=postgres psql -U postgres -f /docker-entrypoint-initdb.d/create_database.sql"
+
       - name: Build
         working-directory: src
         run: go build -o messenger -buildvcs=false
@@ -36,12 +48,12 @@ jobs:
         working-directory: src
         run: ./messenger migrations up
         env:
-          POSTGRES_URL: postgres://postgres:postgres@postgres:5432/messenger
+          POSTGRES_URL: postgres://postgres:postgres@postgres:5432/messenger1,postgres://postgres:postgres@postgres:5432/messenger2
           KAFKA_BROKER_LIST: kafka:9092
 
       - name: Test
         working-directory: src
         run: go test -race ./...
         env:
-          POSTGRES_URL: postgres://postgres:postgres@postgres:5432/messenger
+          POSTGRES_URL: postgres://postgres:postgres@postgres:5432/messenger1,postgres://postgres:postgres@postgres:5432/messenger2
           KAFKA_BROKER_LIST: kafka:9092

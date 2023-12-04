@@ -5,6 +5,7 @@ go 1.21.1
 require (
 	github.com/IBM/sarama v1.41.2
 	github.com/cenkalti/backoff/v4 v4.2.1
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
 	github.com/google/uuid v1.4.0
 	github.com/google/wire v0.5.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.1

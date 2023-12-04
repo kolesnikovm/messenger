@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/kolesnikovm/messenger/entity"
+	"github.com/kolesnikovm/messenger/metrics"
 	"github.com/kolesnikovm/messenger/proto"
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
@@ -16,6 +17,8 @@ import (
 const maxMessageCount = 1_000
 
 func (h *Handler) GetMessageHistory(ctx context.Context, req *proto.HistoryRequest) (*proto.HistoryResponse, error) {
+	metrics.HistoryRequestsTotal.Inc()
+
 	userID := ctx.Value(StringContextKey("userID")).(uint64)
 
 	messageID, err := ulid.Parse(req.MessageID)

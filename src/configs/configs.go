@@ -21,6 +21,7 @@ func newViper() *viper.Viper {
 	vp.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	vp.SetDefault("listen_port", "9101")
+	vp.SetDefault("metrics_address", ":9102")
 
 	vp.SetDefault("kafka.broker_list", "localhost:9094")
 
@@ -63,10 +64,11 @@ type Kafka struct {
 }
 
 type ServerConfig struct {
-	ListenPort int      `mapstructure:"listen_port"`
-	Kafka      Kafka    `mapstructure:"kafka"`
-	Archiver   Archiver `mapstructure:"archiver"`
-	Postgres   Postgres `mapstructure:"postgres"`
+	ListenPort     int      `mapstructure:"listen_port"`
+	MetricsAddress string   `mapstructure:"metrics_address"`
+	Kafka          Kafka    `mapstructure:"kafka"`
+	Archiver       Archiver `mapstructure:"archiver"`
+	Postgres       Postgres `mapstructure:"postgres"`
 }
 
 type ClientConfig struct {

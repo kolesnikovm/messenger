@@ -8,6 +8,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/entity"
+	"github.com/kolesnikovm/messenger/metrics"
 	"github.com/kolesnikovm/messenger/notifier/kafka"
 	"github.com/kolesnikovm/messenger/store"
 	"github.com/rs/zerolog/log"
@@ -86,4 +87,6 @@ func (c *Consumer) SendMessages(ctx context.Context, messages []*entity.Message)
 	}
 
 	c.Backoff.Reset()
+
+	metrics.MessagesSavedTotal.Add(float64(len(messages)))
 }

@@ -2,8 +2,10 @@ package kafka
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/IBM/sarama"
 	"github.com/kolesnikovm/messenger/entity"
@@ -36,10 +38,19 @@ func (k *KafkaMessageSender) Send(ctx context.Context, msg *entity.Message) erro
 	go func() {
 		defer close(resultCh)
 
+		buf := make([]byte, 8)
+		binary.LittleEndian.PutUint64(buf, uint64(time.Now().UnixMilli()))
+
+		timestampHeader := sarama.RecordHeader{
+			Key:   []byte("timestamp"),
+			Value: buf,
+		}
+
 		partition, offset, err := k.Producer.SendMessage(&sarama.ProducerMessage{
-			Key:   sarama.ByteEncoder(messageKey),
-			Topic: messageTopic,
-			Value: sarama.ByteEncoder(payload),
+			Key:     sarama.ByteEncoder(messageKey),
+			Headers: []sarama.RecordHeader{timestampHeader},
+			Topic:   messageTopic,
+			Value:   sarama.ByteEncoder(payload),
 		})
 
 		resultCh <- &result{

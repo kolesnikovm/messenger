@@ -2,14 +2,15 @@ package kafka
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"strconv"
-	"strings"
+	"time"
 
 	"github.com/IBM/sarama"
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/entity"
+	"github.com/kolesnikovm/messenger/metrics"
 	"github.com/kolesnikovm/messenger/notifier/hub"
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
@@ -97,18 +98,16 @@ func (k *KafkaMessageSender) Start(ctx context.Context) {
 						return
 					}
 
-					recipientIDs := strings.Split(string(msg.Key), ":")
+					recipientIDs, err := getRecipientIDs(msg.Key)
+					if err != nil {
+						log.Error().Msgf("failed to get recipient ids from kafka key: %s", msg.Key)
+						continue
+					}
 
 					var streams [][]chan *entity.Message
 
 					for _, recipientID := range recipientIDs {
-						userID, err := strconv.ParseUint(recipientID, 10, 64)
-						if err != nil {
-							log.Error().Msgf("failed to parse user id from %s", recipientID)
-							continue
-						}
-
-						userStreams := k.StreamHub.GetStreams(userID)
+						userStreams := k.StreamHub.GetStreams(recipientID)
 						if len(userStreams) == 0 {
 							continue
 						}
@@ -123,6 +122,15 @@ func (k *KafkaMessageSender) Start(ctx context.Context) {
 					if err != nil {
 						log.Error().Err(err).Msg("")
 						continue
+					}
+
+					for _, header := range msg.Headers {
+						if string(header.Key) == "timestamp" {
+							sendTime := float64(binary.LittleEndian.Uint64(header.Value))
+							receiveTime := float64(time.Now().UnixMilli())
+
+							metrics.MessagesLatency.Observe(receiveTime - sendTime)
+						}
 					}
 
 					for _, userStreams := range streams {
@@ -155,4 +163,38 @@ func ParseMessage(byteMessage []byte) (*entity.Message, error) {
 		kafkaMessage.RecipientID,
 		kafkaMessage.Text,
 	), nil
+}
+
+func getRecipientIDs(key []byte) ([]uint64, error) {
+	const op = "kafka.getRecipientIDs"
+
+	chatID := string(key)
+
+	switch entity.GetChatType(chatID) {
+	case entity.Group:
+		_, err := entity.GetGroupID(chatID)
+		if err != nil {
+			return nil, err
+		}
+
+		// TODO return group members
+		return nil, nil
+	case entity.Channel:
+		_, err := entity.GetChannelID(chatID)
+		if err != nil {
+			return nil, err
+		}
+
+		// TODO return channel members
+		return nil, nil
+	case entity.P2P:
+		user1, user2, err := entity.GetUserIDs(chatID)
+		if err != nil {
+			return nil, err
+		}
+
+		return []uint64{user1, user2}, nil
+	}
+
+	return nil, fmt.Errorf("%s: failed to determine recipient ids from: %s", op, chatID)
 }

@@ -3,10 +3,15 @@ package messenger
 import (
 	"io"
 
+	"github.com/kolesnikovm/messenger/metrics"
 	"github.com/kolesnikovm/messenger/proto"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func (s *Handler) SendMessage(stream proto.Messenger_SendMessageServer) error {
+	metrics.ActiveStreams.With(prometheus.Labels{"type": "send"}).Inc()
+	defer metrics.ActiveStreams.With(prometheus.Labels{"type": "send"}).Dec()
+
 	for {
 		message, err := stream.Recv()
 		if err == io.EOF {
@@ -25,5 +30,7 @@ func (s *Handler) SendMessage(stream proto.Messenger_SendMessageServer) error {
 		if err != nil {
 			return err
 		}
+
+		metrics.MessagesReceivedTotal.Inc()
 	}
 }

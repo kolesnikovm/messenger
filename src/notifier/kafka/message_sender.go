@@ -2,14 +2,17 @@ package kafka
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/IBM/sarama"
 	"github.com/kolesnikovm/messenger/configs"
 	"github.com/kolesnikovm/messenger/entity"
+	"github.com/kolesnikovm/messenger/metrics"
 	"github.com/kolesnikovm/messenger/notifier/hub"
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
@@ -123,6 +126,15 @@ func (k *KafkaMessageSender) Start(ctx context.Context) {
 					if err != nil {
 						log.Error().Err(err).Msg("")
 						continue
+					}
+
+					for _, header := range msg.Headers {
+						if string(header.Key) == "timestamp" {
+							sendTime := float64(binary.LittleEndian.Uint64(header.Value))
+							receiveTime := float64(time.Now().UnixMilli())
+
+							metrics.MessagesLatency.Observe(receiveTime - sendTime)
+						}
 					}
 
 					for _, userStreams := range streams {

@@ -6,6 +6,7 @@ var (
 	MessagesReceivedTotal prometheus.Counter
 	MessagesSentTotal     prometheus.Counter
 	MessagesSavedTotal    prometheus.Counter
+	MessagesLatency       prometheus.Histogram
 	HistoryRequestsTotal  prometheus.Counter
 	ActiveStreams         *prometheus.GaugeVec
 )
@@ -33,6 +34,16 @@ func init() {
 		},
 	)
 
+	MessagesLatency = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Name: "messages_delivery_latency_ms",
+			Help: "Time in milliseconds that message spent in kafka",
+			Buckets: []float64{
+				50, 100, 200, 300, 400, 500, 1000,
+			},
+		},
+	)
+
 	HistoryRequestsTotal = prometheus.NewCounter(
 		prometheus.CounterOpts{
 			Name: "history_requests_total",
@@ -52,6 +63,8 @@ func init() {
 		MessagesReceivedTotal,
 		MessagesSentTotal,
 		MessagesSavedTotal,
+		MessagesLatency,
+		HistoryRequestsTotal,
 		ActiveStreams,
 	)
 }

@@ -43,10 +43,12 @@ func TestSendMessage(t *testing.T) {
 	err = stream.Send(message)
 	require.NoErrorf(t, err, "Error in %v.Send(%v)", stream, message)
 
-	reply, err := stream.CloseAndRecv()
-	require.NoErrorf(t, err, "Error in %v.CloseAndRecv()", stream)
+	ack, err := stream.Recv()
+	require.NoErrorf(t, err, "Error in %v.Recv()", stream)
+	require.Equal(t, message.MessageID, ack.MessageID)
 
-	require.Equal(t, 0, int(reply.GetErrorCount()))
+	err = stream.CloseSend()
+	require.NoErrorf(t, err, "Error in %v.CloseSend()", stream)
 }
 
 func TestSendMessageInternalError(t *testing.T) {
@@ -75,8 +77,11 @@ func TestSendMessageInternalError(t *testing.T) {
 	err = stream.Send(message)
 	require.NoErrorf(t, err, "Error in %v.Send(%v)", stream, message)
 
-	_, err = stream.CloseAndRecv()
+	_, err = stream.Recv()
 	require.EqualError(t, err, "rpc error: code = Internal desc = Internal")
+
+	err = stream.CloseSend()
+	require.NoErrorf(t, err, "Error in %v.CloseSend()", stream)
 }
 
 func TestSendMessageAuthError(t *testing.T) {
@@ -100,8 +105,11 @@ func TestSendMessageAuthError(t *testing.T) {
 	err = stream.Send(message)
 	require.NoErrorf(t, err, "Error in %v.Send(%v)", stream, message)
 
-	_, err = stream.CloseAndRecv()
+	_, err = stream.Recv()
 	require.EqualError(t, err, "rpc error: code = Unauthenticated desc = Unauthenticated")
+
+	err = stream.CloseSend()
+	require.NoErrorf(t, err, "Error in %v.CloseSend()", stream)
 }
 
 func TestGetMessage(t *testing.T) {

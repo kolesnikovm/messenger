@@ -3,7 +3,7 @@ syntax = "proto3";
 option go_package = "github.com/kolesnikovm/messenger/proto";
 
 service Messenger {
-    rpc SendMessage(stream Message) returns (Status) {}
+    rpc SendMessage(stream Message) returns (stream Message) {}
     rpc GetMessage(MessaggeRequest) returns (stream Message) {}
     rpc GetMessageHistory(HistoryRequest) returns (HistoryResponse) {}
 }
@@ -14,8 +14,6 @@ message Message {
     uint64 recipientID = 3;
     string text = 4;
 }
-
-message Status {}
 
 message MessaggeRequest {}
 

@@ -46,7 +46,7 @@ func (c *messengerClient) SendMessage(ctx context.Context, opts ...grpc.CallOpti
 
 type Messenger_SendMessageClient interface {
 	Send(*Message) error
-	CloseAndRecv() (*Status, error)
+	Recv() (*Message, error)
 	grpc.ClientStream
 }
 
@@ -58,11 +58,8 @@ func (x *messengerSendMessageClient) Send(m *Message) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *messengerSendMessageClient) CloseAndRecv() (*Status, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(Status)
+func (x *messengerSendMessageClient) Recv() (*Message, error) {
+	m := new(Message)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -149,7 +146,7 @@ func _Messenger_SendMessage_Handler(srv interface{}, stream grpc.ServerStream) e
 }
 
 type Messenger_SendMessageServer interface {
-	SendAndClose(*Status) error
+	Send(*Message) error
 	Recv() (*Message, error)
 	grpc.ServerStream
 }
@@ -158,7 +155,7 @@ type messengerSendMessageServer struct {
 	grpc.ServerStream
 }
 
-func (x *messengerSendMessageServer) SendAndClose(m *Status) error {
+func (x *messengerSendMessageServer) Send(m *Message) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -225,6 +222,7 @@ var Messenger_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "SendMessage",
 			Handler:       _Messenger_SendMessage_Handler,
+			ServerStreams: true,
 			ClientStreams: true,
 		},
 		{

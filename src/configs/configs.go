@@ -33,6 +33,8 @@ func newViper() *viper.Viper {
 	vp.SetDefault("postgres.max_connections", 10)
 	vp.SetDefault("postgres.max_connection_lifetime", 10*time.Minute)
 
+	vp.SetDefault("redis.url", "redis://localhost:6379")
+
 	vp.SetDefault("server_address", "127.0.0.1:9101")
 
 	return vp
@@ -63,12 +65,17 @@ type Kafka struct {
 	BrokerList []string `mapstructure:"broker_list"`
 }
 
+type Redis struct {
+	URL string `mapstructure:"url"`
+}
+
 type ServerConfig struct {
 	ListenPort     int      `mapstructure:"listen_port"`
 	MetricsAddress string   `mapstructure:"metrics_address"`
 	Kafka          Kafka    `mapstructure:"kafka"`
 	Archiver       Archiver `mapstructure:"archiver"`
 	Postgres       Postgres `mapstructure:"postgres"`
+	Redis          Redis    `mapstructure:"redis"`
 }
 
 type ClientConfig struct {

@@ -10,3 +10,4 @@ packages:
   github.com/kolesnikovm/messenger/store:
     interfaces:
       Messages:
+      OrderIDCacher:

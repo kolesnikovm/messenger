@@ -28,6 +28,7 @@ type kafkaMessage struct {
 	MessageID   ulid.ULID `json:"messageId"`
 	SenderID    uint64    `json:"senderId"`
 	RecipientID uint64    `json:"recipientId"`
+	OrderID     uint64    `json:"orderId"`
 	Text        string    `json:"text"`
 }
 
@@ -157,12 +158,15 @@ func ParseMessage(byteMessage []byte) (*entity.Message, error) {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return entity.NewMessage(
+	message := entity.NewMessage(
 		kafkaMessage.MessageID,
 		kafkaMessage.SenderID,
 		kafkaMessage.RecipientID,
 		kafkaMessage.Text,
-	), nil
+	)
+	message.OrderID = kafkaMessage.OrderID
+
+	return message, nil
 }
 
 func getRecipientIDs(key []byte) ([]uint64, error) {

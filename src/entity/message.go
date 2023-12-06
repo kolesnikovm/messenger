@@ -21,6 +21,7 @@ type Message struct {
 	MessageID   ulid.ULID
 	SenderID    uint64
 	RecipientID uint64
+	OrderID     uint64
 	chatType    ChatType
 	Text        string
 }

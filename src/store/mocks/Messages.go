@@ -67,6 +67,59 @@ func (_c *MockMessages_BatchInsert_Call) RunAndReturn(run func(context.Context, 
 	return _c
 }
 
+// GetLastMessageOrderID provides a mock function with given fields: ctx, chatID
+func (_m *MockMessages) GetLastMessageOrderID(ctx context.Context, chatID string) (uint64, error) {
+	ret := _m.Called(ctx, chatID)
+
+	var r0 uint64
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (uint64, error)); ok {
+		return rf(ctx, chatID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) uint64); ok {
+		r0 = rf(ctx, chatID)
+	} else {
+		r0 = ret.Get(0).(uint64)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, chatID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockMessages_GetLastMessageOrderID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetLastMessageOrderID'
+type MockMessages_GetLastMessageOrderID_Call struct {
+	*mock.Call
+}
+
+// GetLastMessageOrderID is a helper method to define mock.On call
+//   - ctx context.Context
+//   - chatID string
+func (_e *MockMessages_Expecter) GetLastMessageOrderID(ctx interface{}, chatID interface{}) *MockMessages_GetLastMessageOrderID_Call {
+	return &MockMessages_GetLastMessageOrderID_Call{Call: _e.mock.On("GetLastMessageOrderID", ctx, chatID)}
+}
+
+func (_c *MockMessages_GetLastMessageOrderID_Call) Run(run func(ctx context.Context, chatID string)) *MockMessages_GetLastMessageOrderID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockMessages_GetLastMessageOrderID_Call) Return(_a0 uint64, _a1 error) *MockMessages_GetLastMessageOrderID_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockMessages_GetLastMessageOrderID_Call) RunAndReturn(run func(context.Context, string) (uint64, error)) *MockMessages_GetLastMessageOrderID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetMessageHistory provides a mock function with given fields: ctx, fromMessageID, chatID, messageCount, direction
 func (_m *MockMessages) GetMessageHistory(ctx context.Context, fromMessageID ulid.ULID, chatID string, messageCount uint32, direction string) ([]*entity.Message, error) {
 	ret := _m.Called(ctx, fromMessageID, chatID, messageCount, direction)

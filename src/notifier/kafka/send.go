@@ -25,6 +25,7 @@ func (k *KafkaMessageSender) Send(ctx context.Context, msg *entity.Message) erro
 		MessageID:   msg.MessageID,
 		SenderID:    msg.SenderID,
 		RecipientID: msg.RecipientID,
+		OrderID:     msg.OrderID,
 		Text:        msg.Text,
 	})
 	if err != nil {

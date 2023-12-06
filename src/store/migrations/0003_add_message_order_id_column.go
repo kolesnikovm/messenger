@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	goose.AddMigrationContext(Up0002, Down0002)
+	goose.AddMigrationContext(Up0003, Down0003)
 }
 
 func Up0003(ctx context.Context, tx *sql.Tx) error {

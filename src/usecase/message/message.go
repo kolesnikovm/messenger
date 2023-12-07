@@ -8,5 +8,4 @@ import (
 type MessageUseCase struct {
 	MessageSender notifier.MessageSender
 	MessageStore  store.Messages
-	OrderIDCache  store.OrderIDCacher
 }

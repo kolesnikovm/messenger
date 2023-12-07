@@ -21,7 +21,6 @@ type Suite struct {
 	conn                   *grpc.ClientConn
 	messageSender          *notifier.MockMessageSender
 	messageStore           *store.MockMessages
-	orderIDCache           *store.MockOrderIDCacher
 	archiver               archiver.Archiver
 	t                      *testing.T
 }

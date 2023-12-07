@@ -27,25 +27,17 @@ func InitializeApplication(conf configs.ServerConfig) (*application, func(), err
 		return nil, nil, err
 	}
 	messages := di.ProvideMessages(db, conf)
-	orderIDCacher, cleanup3, err := di.ProvideCache(conf)
-	if err != nil {
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
 	messageUseCase := &message.MessageUseCase{
 		MessageSender: messageSender,
 		MessageStore:  messages,
-		OrderIDCache:  orderIDCacher,
 	}
 	handler := messenger.NewHandler(messageUseCase)
 	serverBuilder := grpc.ServerBuilder{
 		MessengerServer: handler,
 	}
 	server := di.ProvideServer(serverBuilder)
-	archiver, cleanup4, err := di.ProvideArchiver(conf, messages)
+	archiver, cleanup3, err := di.ProvideArchiver(conf, messages)
 	if err != nil {
-		cleanup3()
 		cleanup2()
 		cleanup()
 		return nil, nil, err
@@ -56,7 +48,6 @@ func InitializeApplication(conf configs.ServerConfig) (*application, func(), err
 		notifier:   messageSender,
 	}
 	return serverApplication, func() {
-		cleanup4()
 		cleanup3()
 		cleanup2()
 		cleanup()

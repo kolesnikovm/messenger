@@ -63,8 +63,3 @@ services:
       - "pg_stat_statements.max=10000"
       - "-c"
       - "pg_stat_statements.track=all"
-
-  redis:
-    image: redis:latest
-    ports:
-      - 6379:6379

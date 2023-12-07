@@ -22,11 +22,9 @@ import (
 func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, func(), error) {
 	mockMessageSender := mocks.ProvideNotifier(t)
 	mockMessages := mocks2.ProvideStore(t)
-	mockOrderIDCacher := mocks2.ProvideCache(t)
 	messageUseCase := &message.MessageUseCase{
 		MessageSender: mockMessageSender,
 		MessageStore:  mockMessages,
-		OrderIDCache:  mockOrderIDCacher,
 	}
 	handler := messenger.NewHandler(messageUseCase)
 	serverBuilder := grpc.ServerBuilder{
@@ -49,7 +47,6 @@ func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, func(), e
 		conn:                   clientConn,
 		messageSender:          mockMessageSender,
 		messageStore:           mockMessages,
-		orderIDCache:           mockOrderIDCacher,
 		archiver:               archiver,
 		t:                      t,
 	}

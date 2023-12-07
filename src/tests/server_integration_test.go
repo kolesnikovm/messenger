@@ -26,11 +26,6 @@ func TestSendMessage(t *testing.T) {
 
 	messageID := ulid.Make()
 	entityMessage := entity.NewMessage(messageID, 1, 2, "test")
-	entityMessage.OrderID = 2
-
-	suite.orderIDCache.EXPECT().GetLastMessageOrderID(mock.AnythingOfType("*context.valueCtx"), "1:2").Return(0, nil)
-	suite.messageStore.EXPECT().GetLastMessageOrderID(mock.AnythingOfType("*context.valueCtx"), "1:2").Return(entityMessage.OrderID-1, nil)
-	suite.orderIDCache.EXPECT().SetLastMessageOrderID(mock.AnythingOfType("*context.valueCtx"), "1:2", entityMessage.OrderID-1).Return(nil)
 	suite.messageSender.EXPECT().Send(mock.AnythingOfType("*context.valueCtx"), entityMessage).Return(nil)
 
 	ctx := context.Background()
@@ -65,7 +60,6 @@ func TestSendMessageInternalError(t *testing.T) {
 
 	messageID := ulid.Make()
 	notifierError := errors.New("notifier error")
-	suite.orderIDCache.EXPECT().GetLastMessageOrderID(mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("string")).Return(1, nil)
 	suite.messageSender.EXPECT().Send(mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*entity.Message")).Return(notifierError)
 
 	ctx := context.Background()

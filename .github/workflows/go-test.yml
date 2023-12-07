@@ -26,8 +26,6 @@ jobs:
           KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
           KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
           KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      redis:
-        image: redis:latest
 
     steps:
       - uses: actions/checkout@v4
@@ -59,4 +57,3 @@ jobs:
         env:
           POSTGRES_URL: postgres://postgres:postgres@postgres:5432/messenger1,postgres://postgres:postgres@postgres:5432/messenger2
           KAFKA_BROKER_LIST: kafka:9092
-          REDIS_URL: redis://redis:6379

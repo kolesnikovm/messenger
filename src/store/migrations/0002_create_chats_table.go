@@ -12,11 +12,9 @@ func init() {
 }
 
 func Up0002(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.ExecContext(ctx, `create table if not exists last_read_message (
-		id                    serial          primary key,
-		chat_id               varchar(255)    not null,
-		user_id               bigint          not null,
-		message_order_id      bigint          not null
+	_, err := tx.ExecContext(ctx, `create table if not exists chats (
+		id                    varchar(255)    primary key,
+		message_counter       bigint          not null
 	);`)
 	if err != nil {
 		return err
@@ -26,7 +24,7 @@ func Up0002(ctx context.Context, tx *sql.Tx) error {
 }
 
 func Down0002(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.ExecContext(ctx, `drop table if exists last_read_message;`)
+	_, err := tx.ExecContext(ctx, `drop table if exists chats;`)
 	if err != nil {
 		return err
 	}

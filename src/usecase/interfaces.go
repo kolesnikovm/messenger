@@ -8,7 +8,7 @@ import (
 )
 
 type Message interface {
-	Send(ctx context.Context, message *entity.Message) error
+	Send(ctx context.Context, message *entity.Message) (ulid.ULID, error)
 	Get(ctx context.Context, userID uint64, sessionID ulid.ULID) (stream <-chan *entity.Message, cleanup func())
 	GetHistory(ctx context.Context, chatID string, fromMessageID ulid.ULID, userID uint64, messageCount uint32, direction string) ([]*entity.Message, error)
 }

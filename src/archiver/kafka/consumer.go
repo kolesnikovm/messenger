@@ -36,6 +36,8 @@ func (c *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim saram
 	ticker := time.NewTicker(c.Config.FlushInterval)
 	defer ticker.Stop()
 
+	var lastMsg *sarama.ConsumerMessage
+
 	for {
 		select {
 		case msg, ok := <-claim.Messages():
@@ -43,6 +45,8 @@ func (c *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim saram
 				log.Info().Msgf("%s: message channel was closed", op)
 				return nil
 			}
+
+			lastMsg = msg
 
 			entityMessage, err := kafka.ParseMessage(msg.Value)
 			if err != nil {
@@ -62,9 +66,11 @@ func (c *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim saram
 		case <-ticker.C:
 			if len(messages) > 0 {
 				c.SendMessages(context.Background(), messages)
-			}
 
-			messages = messages[:0]
+				session.MarkMessage(lastMsg, "")
+
+				messages = messages[:0]
+			}
 		case <-session.Context().Done():
 			return nil
 		}

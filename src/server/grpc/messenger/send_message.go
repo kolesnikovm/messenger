@@ -15,7 +15,7 @@ func (s *Handler) SendMessage(stream proto.Messenger_SendMessageServer) error {
 	for {
 		message, err := stream.Recv()
 		if err == io.EOF {
-			return stream.SendAndClose(&proto.Status{})
+			return nil
 		}
 		if err != nil {
 			return err
@@ -26,8 +26,13 @@ func (s *Handler) SendMessage(stream proto.Messenger_SendMessageServer) error {
 			return err
 		}
 
-		err = s.Usecase.Send(stream.Context(), m)
+		msgID, err := s.Usecase.Send(stream.Context(), m)
 		if err != nil {
+			return err
+		}
+
+		ack := &proto.Message{MessageID: msgID.String()}
+		if err := stream.Send(ack); err != nil {
 			return err
 		}
 

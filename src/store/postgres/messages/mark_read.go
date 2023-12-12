@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	markMessageRead = "insert into read_messages (user_id, chat_id, message_id) values ($1, $2, $3) on conflict (user_id, chat_id) do update set message_id = $3"
+	markMessageRead = `insert into chat_participants (user_id, chat_id, last_read_message) values ($1, $2, $3)
+	on conflict (user_id, chat_id) do update set last_read_message = $3`
 )
 
 func (m *Messages) MarkRead(ctx context.Context, userID uint64, message *entity.Message) error {

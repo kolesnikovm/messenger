@@ -70,3 +70,19 @@ func TestGetHistoryForward(t *testing.T) {
 
 	require.Contains(t, historyMessages, message2)
 }
+
+func TestMarkRead(t *testing.T) {
+	config, err := configs.NewServerConfig("")
+	require.NoError(t, err)
+
+	db, err := postgres.New(config.Postgres)
+	require.NoError(t, err)
+
+	messageStore := messages.New(db, config.Postgres)
+
+	ctx := context.Background()
+	message := entity.NewMessage(ulid.Make(), 1, 2, "test")
+
+	err = messageStore.MarkRead(ctx, 1, message)
+	require.NoError(t, err)
+}

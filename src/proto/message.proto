@@ -6,6 +6,7 @@ service Messenger {
     rpc SendMessage(stream Message) returns (stream Message) {}
     rpc GetMessage(MessaggeRequest) returns (stream Message) {}
     rpc GetMessageHistory(HistoryRequest) returns (HistoryResponse) {}
+    rpc ReadMessage(stream Message) returns (stream Message) {}
 }
 
 message Message {

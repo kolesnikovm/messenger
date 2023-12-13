@@ -8,8 +8,7 @@ import (
 )
 
 const (
-	markMessageRead = `insert into chat_participants (user_id, chat_id, last_read_message) values ($1, $2, $3)
-	on conflict (user_id, chat_id) do update set last_read_message = $3`
+	markMessageRead = "update chat_participants set last_read_message = $1 where chat_id = $2 and user_id = $3"
 )
 
 func (m *Messages) MarkRead(ctx context.Context, userID uint64, message *entity.Message) error {
@@ -17,7 +16,7 @@ func (m *Messages) MarkRead(ctx context.Context, userID uint64, message *entity.
 
 	chatID := message.GetChatID()
 
-	if _, err := m.DB.PartitionSet.Get(chatID).Exec(ctx, markMessageRead, userID, chatID, message.MessageID); err != nil {
+	if _, err := m.DB.PartitionSet.Get(chatID).Exec(ctx, markMessageRead, message.MessageID, chatID, userID); err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 

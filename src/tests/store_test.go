@@ -86,3 +86,18 @@ func TestMarkRead(t *testing.T) {
 	err = messageStore.MarkRead(ctx, 1, message)
 	require.NoError(t, err)
 }
+
+func TestGetChatsStore(t *testing.T) {
+	config, err := configs.NewServerConfig("")
+	require.NoError(t, err)
+
+	db, err := postgres.New(config.Postgres)
+	require.NoError(t, err)
+
+	messageStore := messages.New(db, config.Postgres)
+
+	ctx := context.Background()
+
+	_, err = messageStore.GetChats(ctx, 1)
+	require.NoError(t, err)
+}

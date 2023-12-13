@@ -7,6 +7,7 @@ service Messenger {
     rpc GetMessage(MessaggeRequest) returns (stream Message) {}
     rpc GetMessageHistory(HistoryRequest) returns (HistoryResponse) {}
     rpc ReadMessage(Message) returns (Message) {}
+    rpc GetChats(ChatsRequest) returns (ChatsResponse) {}
 }
 
 message Message {
@@ -31,4 +32,15 @@ message HistoryRequest {
 
 message HistoryResponse {
     repeated Message messages = 1;
+}
+
+message ChatsRequest {}
+
+message ChatsResponse {
+    repeated Chat chats = 1;
+}
+
+message Chat {
+    string chatID = 1;
+    uint32 unreadMessages = 2;
 }

@@ -12,4 +12,5 @@ type Message interface {
 	Get(ctx context.Context, userID uint64, sessionID ulid.ULID) (stream <-chan *entity.Message, cleanup func())
 	GetHistory(ctx context.Context, chatID string, fromMessageID ulid.ULID, userID uint64, messageCount uint32, direction string) ([]*entity.Message, error)
 	Read(ctx context.Context, userID uint64, message *entity.Message) error
+	GetChats(ctx context.Context, userID uint64) ([]*entity.Chat, error)
 }

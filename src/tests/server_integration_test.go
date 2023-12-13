@@ -292,3 +292,34 @@ func TestReadMessage(t *testing.T) {
 	_, err = suite.messengerServiceClient.ReadMessage(ctx, message)
 	require.NoError(t, err)
 }
+
+func TestGetChats(t *testing.T) {
+	config, err := configs.NewServerConfig("")
+	require.NoError(t, err)
+
+	suite, cleanup, err := InitializeSuite(t, config)
+	require.NoError(t, err)
+	defer cleanup()
+
+	chats := []*entity.Chat{
+		{ID: "1:2", UnreadMessages: 10},
+		{ID: "1:3", UnreadMessages: 0},
+	}
+	suite.messageStore.EXPECT().GetChats(mock.AnythingOfType("*context.valueCtx"), uint64(1)).Return(chats, nil)
+
+	ctx := context.Background()
+	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1")
+
+	response, err := suite.messengerServiceClient.GetChats(ctx, &proto.ChatsRequest{})
+	require.NoError(t, err)
+
+	chatsResponse := []*entity.Chat{}
+	for _, chat := range response.Chats {
+		chatsResponse = append(chatsResponse, &entity.Chat{
+			ID:             chat.ChatID,
+			UnreadMessages: chat.UnreadMessages,
+		})
+	}
+
+	require.EqualValues(t, chats, chatsResponse)
+}

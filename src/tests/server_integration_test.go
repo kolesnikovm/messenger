@@ -283,22 +283,12 @@ func TestReadMessage(t *testing.T) {
 	ctx := context.Background()
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1")
 
-	stream, err := suite.messengerServiceClient.ReadMessage(ctx)
-	require.NoErrorf(t, err, "Failed to create stream")
-
 	message := &proto.Message{
 		MessageID:   messageID.String(),
 		SenderID:    1,
 		RecipientID: 2,
 		Text:        "test",
 	}
-	err = stream.Send(message)
-	require.NoErrorf(t, err, "Error in %v.Send(%v)", stream, message)
-
-	ack, err := stream.Recv()
-	require.NoErrorf(t, err, "Error in %v.Recv()", stream)
-	require.Equal(t, message.MessageID, ack.MessageID)
-
-	err = stream.CloseSend()
-	require.NoErrorf(t, err, "Error in %v.CloseSend()", stream)
+	_, err = suite.messengerServiceClient.ReadMessage(ctx, message)
+	require.NoError(t, err)
 }

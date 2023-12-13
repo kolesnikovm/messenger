@@ -1,41 +1,30 @@
 package messenger
 
 import (
-	"io"
+	"context"
 
 	"github.com/kolesnikovm/messenger/metrics"
 	"github.com/kolesnikovm/messenger/proto"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-func (s *Handler) ReadMessage(stream proto.Messenger_ReadMessageServer) error {
+func (s *Handler) ReadMessage(ctx context.Context, req *proto.Message) (*proto.Message, error) {
 	metrics.ActiveStreams.With(prometheus.Labels{"type": "read"}).Inc()
 	defer metrics.ActiveStreams.With(prometheus.Labels{"type": "read"}).Dec()
 
-	userID := stream.Context().Value(StringContextKey("userID")).(uint64)
+	userID := ctx.Value(StringContextKey("userID")).(uint64)
 
-	for {
-		message, err := stream.Recv()
-		if err == io.EOF {
-			return nil
-		}
-		if err != nil {
-			return err
-		}
-
-		m, err := convertPbToEntity(message)
-		if err != nil {
-			return err
-		}
-
-		msgID, err := s.Usecase.Read(stream.Context(), userID, m)
-		if err != nil {
-			return err
-		}
-
-		ack := &proto.Message{MessageID: msgID.String()}
-		if err := stream.Send(ack); err != nil {
-			return err
-		}
+	m, err := convertPbToEntity(req)
+	if err != nil {
+		return nil, err
 	}
+
+	err = s.Usecase.Read(ctx, userID, m)
+	if err != nil {
+		return nil, err
+	}
+
+	ack := &proto.Message{}
+
+	return ack, nil
 }

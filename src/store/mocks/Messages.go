@@ -125,6 +125,50 @@ func (_c *MockMessages_GetMessageHistory_Call) RunAndReturn(run func(context.Con
 	return _c
 }
 
+// MarkRead provides a mock function with given fields: ctx, userID, message
+func (_m *MockMessages) MarkRead(ctx context.Context, userID uint64, message *entity.Message) error {
+	ret := _m.Called(ctx, userID, message)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, *entity.Message) error); ok {
+		r0 = rf(ctx, userID, message)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockMessages_MarkRead_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'MarkRead'
+type MockMessages_MarkRead_Call struct {
+	*mock.Call
+}
+
+// MarkRead is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID uint64
+//   - message *entity.Message
+func (_e *MockMessages_Expecter) MarkRead(ctx interface{}, userID interface{}, message interface{}) *MockMessages_MarkRead_Call {
+	return &MockMessages_MarkRead_Call{Call: _e.mock.On("MarkRead", ctx, userID, message)}
+}
+
+func (_c *MockMessages_MarkRead_Call) Run(run func(ctx context.Context, userID uint64, message *entity.Message)) *MockMessages_MarkRead_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uint64), args[2].(*entity.Message))
+	})
+	return _c
+}
+
+func (_c *MockMessages_MarkRead_Call) Return(_a0 error) *MockMessages_MarkRead_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockMessages_MarkRead_Call) RunAndReturn(run func(context.Context, uint64, *entity.Message) error) *MockMessages_MarkRead_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockMessages creates a new instance of MockMessages. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockMessages(t interface {

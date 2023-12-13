@@ -267,3 +267,28 @@ func TestGetMessageHistoryPermissionError(t *testing.T) {
 		Direction:    proto.HistoryRequest_BACKWARD})
 	require.EqualError(t, err, "rpc error: code = NotFound desc = Chat not found")
 }
+
+func TestReadMessage(t *testing.T) {
+	config, err := configs.NewServerConfig("")
+	require.NoError(t, err)
+
+	suite, cleanup, err := InitializeSuite(t, config)
+	require.NoError(t, err)
+	defer cleanup()
+
+	messageID := ulid.Make()
+	entityMessage := entity.NewMessage(messageID, 1, 2, "test")
+	suite.messageStore.EXPECT().MarkRead(mock.AnythingOfType("*context.valueCtx"), uint64(1), entityMessage).Return(nil)
+
+	ctx := context.Background()
+	ctx = metadata.AppendToOutgoingContext(ctx, "x-user-id", "1")
+
+	message := &proto.Message{
+		MessageID:   messageID.String(),
+		SenderID:    1,
+		RecipientID: 2,
+		Text:        "test",
+	}
+	_, err = suite.messengerServiceClient.ReadMessage(ctx, message)
+	require.NoError(t, err)
+}

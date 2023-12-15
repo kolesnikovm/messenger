@@ -8,11 +8,20 @@ import (
 )
 
 const (
-	selectChats = `select c.id, c.message_counter - m.order_id as unread_messages
-	from messages m
-	join chat_participants cp on m.id = cp.last_read_message
-	join chats c on c.id = cp.chat_id
-	where cp.user_id = $1`
+	selectChats = `select
+		c.id,
+		case
+			when last_read_message is null then c.message_counter
+			when last_read_message is not null then c.message_counter - m.order_id
+		end as unread_messages
+	from
+		chats c
+	join chat_participants cp on
+		c.id = cp.chat_id
+	left join messages m on
+		m.id = cp.last_read_message
+	where
+		cp.user_id = $1`
 )
 
 func (m *Messages) GetChats(ctx context.Context, userID uint64) ([]*entity.Chat, error) {

@@ -15,7 +15,7 @@ func Up0004(ctx context.Context, tx *sql.Tx) error {
 	_, err := tx.ExecContext(ctx, `create table if not exists chat_participants (
 		user_id                bigint          not null,
 		chat_id                varchar(255)    not null,
-		last_read_message      uuid            not null,
+		last_read_message      uuid,
 		primary key(user_id, chat_id),
 		foreign key(chat_id) references chats(id)
 	);`)

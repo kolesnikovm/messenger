@@ -26,6 +26,7 @@ type MessengerClient interface {
 	GetMessage(ctx context.Context, in *MessaggeRequest, opts ...grpc.CallOption) (Messenger_GetMessageClient, error)
 	GetMessageHistory(ctx context.Context, in *HistoryRequest, opts ...grpc.CallOption) (*HistoryResponse, error)
 	ReadMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error)
+	GetChats(ctx context.Context, in *ChatsRequest, opts ...grpc.CallOption) (*ChatsResponse, error)
 }
 
 type messengerClient struct {
@@ -117,6 +118,15 @@ func (c *messengerClient) ReadMessage(ctx context.Context, in *Message, opts ...
 	return out, nil
 }
 
+func (c *messengerClient) GetChats(ctx context.Context, in *ChatsRequest, opts ...grpc.CallOption) (*ChatsResponse, error) {
+	out := new(ChatsResponse)
+	err := c.cc.Invoke(ctx, "/Messenger/GetChats", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MessengerServer is the server API for Messenger service.
 // All implementations should embed UnimplementedMessengerServer
 // for forward compatibility
@@ -125,6 +135,7 @@ type MessengerServer interface {
 	GetMessage(*MessaggeRequest, Messenger_GetMessageServer) error
 	GetMessageHistory(context.Context, *HistoryRequest) (*HistoryResponse, error)
 	ReadMessage(context.Context, *Message) (*Message, error)
+	GetChats(context.Context, *ChatsRequest) (*ChatsResponse, error)
 }
 
 // UnimplementedMessengerServer should be embedded to have forward compatible implementations.
@@ -142,6 +153,9 @@ func (UnimplementedMessengerServer) GetMessageHistory(context.Context, *HistoryR
 }
 func (UnimplementedMessengerServer) ReadMessage(context.Context, *Message) (*Message, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadMessage not implemented")
+}
+func (UnimplementedMessengerServer) GetChats(context.Context, *ChatsRequest) (*ChatsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetChats not implemented")
 }
 
 // UnsafeMessengerServer may be embedded to opt out of forward compatibility for this service.
@@ -238,6 +252,24 @@ func _Messenger_ReadMessage_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Messenger_GetChats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessengerServer).GetChats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Messenger/GetChats",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessengerServer).GetChats(ctx, req.(*ChatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Messenger_ServiceDesc is the grpc.ServiceDesc for Messenger service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -252,6 +284,10 @@ var Messenger_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReadMessage",
 			Handler:    _Messenger_ReadMessage_Handler,
+		},
+		{
+			MethodName: "GetChats",
+			Handler:    _Messenger_GetChats_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

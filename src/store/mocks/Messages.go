@@ -67,6 +67,61 @@ func (_c *MockMessages_BatchInsert_Call) RunAndReturn(run func(context.Context, 
 	return _c
 }
 
+// GetChats provides a mock function with given fields: ctx, userID
+func (_m *MockMessages) GetChats(ctx context.Context, userID uint64) ([]*entity.Chat, error) {
+	ret := _m.Called(ctx, userID)
+
+	var r0 []*entity.Chat
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) ([]*entity.Chat, error)); ok {
+		return rf(ctx, userID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) []*entity.Chat); ok {
+		r0 = rf(ctx, userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*entity.Chat)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint64) error); ok {
+		r1 = rf(ctx, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockMessages_GetChats_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetChats'
+type MockMessages_GetChats_Call struct {
+	*mock.Call
+}
+
+// GetChats is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID uint64
+func (_e *MockMessages_Expecter) GetChats(ctx interface{}, userID interface{}) *MockMessages_GetChats_Call {
+	return &MockMessages_GetChats_Call{Call: _e.mock.On("GetChats", ctx, userID)}
+}
+
+func (_c *MockMessages_GetChats_Call) Run(run func(ctx context.Context, userID uint64)) *MockMessages_GetChats_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uint64))
+	})
+	return _c
+}
+
+func (_c *MockMessages_GetChats_Call) Return(_a0 []*entity.Chat, _a1 error) *MockMessages_GetChats_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockMessages_GetChats_Call) RunAndReturn(run func(context.Context, uint64) ([]*entity.Chat, error)) *MockMessages_GetChats_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetMessageHistory provides a mock function with given fields: ctx, fromMessageID, chatID, messageCount, direction
 func (_m *MockMessages) GetMessageHistory(ctx context.Context, fromMessageID ulid.ULID, chatID string, messageCount uint32, direction string) ([]*entity.Message, error) {
 	ret := _m.Called(ctx, fromMessageID, chatID, messageCount, direction)

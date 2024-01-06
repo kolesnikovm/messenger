@@ -80,9 +80,32 @@ func TestMarkRead(t *testing.T) {
 
 	messageStore := messages.New(db, config.Postgres)
 
-	ctx := context.Background()
+	messageArchiver, err := kafka.New(config.Kafka, config.Archiver, messageStore)
+	require.NoError(t, err)
+
 	message := entity.NewMessage(ulid.Make(), 1, 2, "test")
+	messages := []*entity.Message{message}
+
+	ctx := context.Background()
+	messageArchiver.GroupConsumer.SendMessages(ctx, messages)
+
+	time.Sleep(1 * time.Second)
 
 	err = messageStore.MarkRead(ctx, 1, message)
+	require.NoError(t, err)
+}
+
+func TestGetChatsStore(t *testing.T) {
+	config, err := configs.NewServerConfig("")
+	require.NoError(t, err)
+
+	db, err := postgres.New(config.Postgres)
+	require.NoError(t, err)
+
+	messageStore := messages.New(db, config.Postgres)
+
+	ctx := context.Background()
+
+	_, err = messageStore.GetChats(ctx, 1)
 	require.NoError(t, err)
 }

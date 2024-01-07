@@ -1,0 +1,23 @@
+tests:
+  - name: User cache
+    target_processors: /pipeline/processors
+    input_batch:
+      - content: |
+          {
+            "userId": 1,
+            "name": "John Doe"
+          }
+      - content: |
+          {
+            "userId": 2,
+            "name": "Jane Doe"
+          }
+    output_batches:
+      - - json_equals: {
+            "userId": 1,
+            "name": "John Doe"
+          }
+        - json_equals: {
+          "userId": 2,
+          "name": "Jane Doe"
+        }

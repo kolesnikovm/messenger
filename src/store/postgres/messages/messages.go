@@ -9,7 +9,7 @@ import (
 
 type Messages struct {
 	DB     *postgres.DB
-	Config configs.Postgres
+	Config *configs.Postgres
 	chats  *messageCounter
 }
 
@@ -18,7 +18,7 @@ type messageCounter struct {
 	counters map[string]uint64
 }
 
-func New(db *postgres.DB, conf configs.Postgres) *Messages {
+func New(db *postgres.DB, conf *configs.Postgres) *Messages {
 	return &Messages{
 		DB:     db,
 		Config: conf,

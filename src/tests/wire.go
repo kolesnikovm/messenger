@@ -13,7 +13,7 @@ import (
 	store "github.com/kolesnikovm/messenger/store/mocks"
 )
 
-func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, func(), error) {
+func InitializeSuite(t *testing.T, conf *configs.ServerConfig) (*Suite, func(), error) {
 	wire.Build(
 		di.UsecaseSet,
 		di.ServerSet,

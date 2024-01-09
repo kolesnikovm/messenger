@@ -8,8 +8,8 @@ import (
 	"github.com/kolesnikovm/messenger/store"
 )
 
-func ProvideArchiver(conf configs.ServerConfig, messageStore store.Messages) (archiver.Archiver, func(), error) {
-	archiver, err := kafka.New(conf.Kafka, conf.Archiver, messageStore)
+func ProvideArchiver(conf *configs.ServerConfig, messageStore store.Messages) (archiver.Archiver, func(), error) {
+	archiver, err := kafka.New(&conf.Kafka, &conf.Archiver, messageStore)
 
 	cleanup := func() {
 		archiver.Close()

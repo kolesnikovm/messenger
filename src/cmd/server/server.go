@@ -30,6 +30,10 @@ var Cmd = &cobra.Command{
 			log.Fatal().Err(err).Msg("failed to instantiate config")
 		}
 
+		ctx, cancel := context.WithCancel(context.Background())
+
+		config.Watch(ctx)
+
 		stop := make(chan os.Signal, 1)
 		signal.Notify(stop, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
@@ -37,8 +41,6 @@ var Cmd = &cobra.Command{
 		if err != nil {
 			log.Fatal().Err(err).Msgf("failed to listen port %d", config.ListenPort)
 		}
-
-		ctx, cancel := context.WithCancel(context.Background())
 
 		app, cleanup, err := InitializeApplication(config)
 		if err != nil {

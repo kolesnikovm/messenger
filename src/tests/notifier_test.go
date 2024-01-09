@@ -16,7 +16,7 @@ func TestSendAndGet(t *testing.T) {
 	config, err := configs.NewServerConfig("")
 	require.NoError(t, err)
 
-	kafkaMessageSender, err := kafka.New(config.Kafka)
+	kafkaMessageSender, err := kafka.New(&config.Kafka)
 	require.NoError(t, err)
 	defer kafkaMessageSender.Close()
 

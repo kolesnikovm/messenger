@@ -1,0 +1,62 @@
+input:
+  broker:
+    inputs:
+      - kafka:
+          addresses: [ "${KAFKA_BROKERS}" ]
+          topics: [ messages ]
+          consumer_group: benthos_messages_group
+
+      - kafka:
+          addresses: [ "${KAFKA_BROKERS}" ]
+          topics: [ messages_retry ]
+          consumer_group: benthos_messages_group
+        processors:
+          - for_each:
+            - sleep:
+                duration: '${! 3600 - ( timestamp_unix() - meta("last_attempted").number() ) }s'
+
+pipeline:
+  processors:
+    - try:
+      - for_each:
+        - branch:
+            request_map: 'root = this.senderId | deleted()'
+            processors:
+              - cache:
+                  operator: get
+                  resource: user_cache
+                  key: '${!content()}'
+            result_map: |
+              root.sender = this
+              root.senderId = deleted()
+
+        - branch:
+            request_map: 'root = this.recipientId | deleted()'
+            processors:
+              - cache:
+                  operator: get
+                  resource: user_cache
+                  key: '${!content()}'
+            result_map: |
+              root.recipient = this
+              root.recipientId = deleted()
+
+      - mapping: 'meta output_topic = "messages_hydrated"'
+
+    - catch:
+        - mapping: |
+            meta output_topic = "messages_retry"
+            meta last_attempted = timestamp_unix()
+
+output:
+  kafka:
+    addresses: [ "${KAFKA_BROKERS}" ]
+    topic: '${!meta("output_topic")}'
+
+cache_resources:
+  - label: user_cache
+    redis:
+      url: "${REDIS_URL}"
+
+metrics:
+  prometheus: {}

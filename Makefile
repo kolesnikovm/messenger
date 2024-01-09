@@ -24,3 +24,8 @@ test:
 .PHONY: lint
 lint:
 	cd src; golangci-lint run ./...
+
+.PHONY: benthos
+benthos:
+	REDIS_URL=redis://localhost:6379 KAFKA_BROKERS=localhost:9094 benthos test .benthos/cache_users_benthos_test.yaml
+	REDIS_URL=redis://localhost:6379 KAFKA_BROKERS=localhost:9094 benthos test .benthos/hydrate_messages_benthos_test.yaml 

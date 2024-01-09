@@ -63,3 +63,28 @@ services:
       - "pg_stat_statements.max=10000"
       - "-c"
       - "pg_stat_statements.track=all"
+
+  benthos-users:
+    image: jeffail/benthos
+    ports:
+      - "4195:4195"
+    volumes:
+      - .benthos/cache_users.yaml:/benthos.yaml
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - KAFKA_BROKERS=kafka:9092
+
+  benthos-messages:
+    image: jeffail/benthos
+    ports:
+      - "4196:4195"
+    volumes:
+      - .benthos/hydrate_messages.yaml:/benthos.yaml
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - KAFKA_BROKERS=kafka:9092
+
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379

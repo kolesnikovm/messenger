@@ -1,0 +1,43 @@
+tests:
+  - name: Hydrate message
+    target_processors: /pipeline/processors
+    input_batch:
+      - content: |
+          {
+            "messageId": "1",
+            "senderId": 1,
+            "recipientId": 2,
+            "text": "ping"
+          }
+      - content: |
+          {
+            "messageId": "2",
+            "senderId": 2,
+            "recipientId": 1,
+            "text": "pong"
+          }
+    output_batches:
+      - - json_equals: {
+            "messageId": "1",
+            "sender": {
+              "userId": 1,
+              "name": "John Doe"
+            },
+            "recipient": {
+              "userId": 2,
+              "name": "Jane Doe"
+            },
+            "text": "ping"
+          }
+        - json_equals: {
+          "messageId": "2",
+          "sender": {
+            "userId": 2,
+            "name": "Jane Doe"
+          },
+          "recipient": {
+            "userId": 1,
+            "name": "John Doe"
+          },
+          "text": "pong"
+        }

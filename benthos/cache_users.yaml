@@ -1,0 +1,24 @@
+input:
+  kafka:
+    addresses: [ "${KAFKA_BROKERS}" ]
+    topics: [ users ]
+    consumer_group: benthos_users_group
+
+pipeline:
+  processors:
+    - cache:
+        operator: set
+        resource: user_cache
+        key: '${! json("userId") }'
+        value: '${! content() }'
+
+output:
+  drop: {}
+
+cache_resources:
+  - label: user_cache
+    redis:
+      url: "${REDIS_URL}"
+
+metrics:
+  prometheus: {}

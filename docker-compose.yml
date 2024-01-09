@@ -3,6 +3,7 @@ version: "3.9"
 volumes:
   kafka:
   postgres:
+  consul:
 
 services:
   kafka:
@@ -69,7 +70,7 @@ services:
     ports:
       - "4195:4195"
     volumes:
-      - .benthos/cache_users.yaml:/benthos.yaml
+      - ./benthos/cache_users.yaml:/benthos.yaml
     environment:
       - REDIS_URL=redis://redis:6379
       - KAFKA_BROKERS=kafka:9092
@@ -79,7 +80,7 @@ services:
     ports:
       - "4196:4195"
     volumes:
-      - .benthos/hydrate_messages.yaml:/benthos.yaml
+      - ./benthos/hydrate_messages.yaml:/benthos.yaml
     environment:
       - REDIS_URL=redis://redis:6379
       - KAFKA_BROKERS=kafka:9092
@@ -88,3 +89,11 @@ services:
     image: redis:latest
     ports:
       - 6379:6379
+
+  consul:
+    image: hashicorp/consul
+    ports:
+      - 8500:8500
+    volumes:
+      - consul:/consul/data
+    command: "agent -server -bootstrap -ui -client 0.0.0.0"

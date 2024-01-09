@@ -13,7 +13,7 @@ type DB struct {
 	PartitionSet *partitions.PartitionSet
 }
 
-func New(conf configs.Postgres) (*DB, error) {
+func New(conf *configs.Postgres) (*DB, error) {
 	const op = "postgres.New"
 
 	connectionPools := make([]*pgxpool.Pool, 0, len(conf.URL))

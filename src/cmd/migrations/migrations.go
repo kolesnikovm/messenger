@@ -42,10 +42,10 @@ var Cmd = &cobra.Command{
 	},
 }
 
-func new(config configs.ServerConfig) (*store.Migrations, error) {
+func new(config *configs.ServerConfig) (*store.Migrations, error) {
 	const op = "migrations.new"
 
-	db, err := postgres.New(config.Postgres)
+	db, err := postgres.New(&config.Postgres)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}

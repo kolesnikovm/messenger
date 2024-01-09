@@ -18,12 +18,12 @@ func TestFlush(t *testing.T) {
 	config, err := configs.NewServerConfig("")
 	require.NoError(t, err)
 
-	db, err := postgres.New(config.Postgres)
+	db, err := postgres.New(&config.Postgres)
 	require.NoError(t, err)
 
-	messageStore := messages.New(db, config.Postgres)
+	messageStore := messages.New(db, &config.Postgres)
 
-	messageArchiver, err := kafka.New(config.Kafka, config.Archiver, messageStore)
+	messageArchiver, err := kafka.New(&config.Kafka, &config.Archiver, messageStore)
 	require.NoError(t, err)
 
 	message1 := entity.NewMessage(ulid.Make(), 1, 2, "test")
@@ -47,12 +47,12 @@ func TestGetHistoryForward(t *testing.T) {
 	config, err := configs.NewServerConfig("")
 	require.NoError(t, err)
 
-	db, err := postgres.New(config.Postgres)
+	db, err := postgres.New(&config.Postgres)
 	require.NoError(t, err)
 
-	messageStore := messages.New(db, config.Postgres)
+	messageStore := messages.New(db, &config.Postgres)
 
-	messageArchiver, err := kafka.New(config.Kafka, config.Archiver, messageStore)
+	messageArchiver, err := kafka.New(&config.Kafka, &config.Archiver, messageStore)
 	require.NoError(t, err)
 
 	message1 := entity.NewMessage(ulid.Make(), 1, 2, "test")
@@ -75,12 +75,12 @@ func TestMarkRead(t *testing.T) {
 	config, err := configs.NewServerConfig("")
 	require.NoError(t, err)
 
-	db, err := postgres.New(config.Postgres)
+	db, err := postgres.New(&config.Postgres)
 	require.NoError(t, err)
 
-	messageStore := messages.New(db, config.Postgres)
+	messageStore := messages.New(db, &config.Postgres)
 
-	messageArchiver, err := kafka.New(config.Kafka, config.Archiver, messageStore)
+	messageArchiver, err := kafka.New(&config.Kafka, &config.Archiver, messageStore)
 	require.NoError(t, err)
 
 	message := entity.NewMessage(ulid.Make(), 1, 2, "test")
@@ -99,10 +99,10 @@ func TestGetChatsStore(t *testing.T) {
 	config, err := configs.NewServerConfig("")
 	require.NoError(t, err)
 
-	db, err := postgres.New(config.Postgres)
+	db, err := postgres.New(&config.Postgres)
 	require.NoError(t, err)
 
-	messageStore := messages.New(db, config.Postgres)
+	messageStore := messages.New(db, &config.Postgres)
 
 	ctx := context.Background()
 

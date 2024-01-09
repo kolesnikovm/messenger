@@ -9,7 +9,7 @@ import (
 	"github.com/kolesnikovm/messenger/di"
 )
 
-func InitializeApplication(conf configs.ServerConfig) (*application, func(), error) {
+func InitializeApplication(conf *configs.ServerConfig) (*application, func(), error) {
 	wire.Build(
 		di.UsecaseSet,
 		di.ServerSet,

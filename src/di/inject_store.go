@@ -8,8 +8,8 @@ import (
 	"github.com/kolesnikovm/messenger/store/postgres/messages"
 )
 
-func ProvideDB(conf configs.ServerConfig) (*postgres.DB, func(), error) {
-	db, err := postgres.New(conf.Postgres)
+func ProvideDB(conf *configs.ServerConfig) (*postgres.DB, func(), error) {
+	db, err := postgres.New(&conf.Postgres)
 
 	cleanup := func() {
 		db.Close()
@@ -18,8 +18,8 @@ func ProvideDB(conf configs.ServerConfig) (*postgres.DB, func(), error) {
 	return db, cleanup, err
 }
 
-func ProvideMessages(db *postgres.DB, conf configs.ServerConfig) store.Messages {
-	return messages.New(db, conf.Postgres)
+func ProvideMessages(db *postgres.DB, conf *configs.ServerConfig) store.Messages {
+	return messages.New(db, &conf.Postgres)
 }
 
 var StoreSet = wire.NewSet(

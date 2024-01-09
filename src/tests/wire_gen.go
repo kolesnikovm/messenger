@@ -19,7 +19,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeSuite(t *testing.T, conf configs.ServerConfig) (*Suite, func(), error) {
+func InitializeSuite(t *testing.T, conf *configs.ServerConfig) (*Suite, func(), error) {
 	mockMessageSender := mocks.ProvideNotifier(t)
 	mockMessages := mocks2.ProvideStore(t)
 	messageUseCase := &message.MessageUseCase{

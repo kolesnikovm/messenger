@@ -55,6 +55,8 @@ var Cmd = &cobra.Command{
 
 		app.archiver.Start(ctx)
 
+		app.database.WatchResharding(ctx)
+
 		go func() {
 			log.Info().Msgf("Messenger server listening on %v", lis.Addr())
 			if err := app.grpcServer.Serve(lis); err != nil {

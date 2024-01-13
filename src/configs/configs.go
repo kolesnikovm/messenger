@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
@@ -55,8 +57,12 @@ type Address struct {
 
 type Postgres struct {
 	URL             []string      `mapstructure:"url"`
+	NewURL          []string      `mapstructure:"new_url"`
+	Resharding      bool          `mapstructure:"resharding"`
 	MaxConns        int32         `mapstructure:"max_connections"`
 	MaxConnLifetime time.Duration `mapstructure:"max_connection_lifetime"`
+
+	Changed chan struct{}
 }
 
 type Archiver struct {
@@ -181,6 +187,8 @@ func NewServerConfig(cfgFile string) (*ServerConfig, error) {
 
 	serverConfig.vp = vp
 
+	serverConfig.Postgres.Changed = make(chan struct{})
+
 	return serverConfig, err
 }
 
@@ -198,8 +206,23 @@ func (c *ServerConfig) Watch(ctx context.Context) {
 					continue
 				}
 
+				conf := c.Postgres
+				conf.URL = nil
+				conf.URL = append(conf.URL, c.Postgres.URL...)
+				conf.NewURL = nil
+				conf.NewURL = append(conf.NewURL, c.Postgres.NewURL...)
+
+				// nil slices in case of shrinking
+				c.Postgres.URL = nil
+				c.Postgres.NewURL = nil
+
 				if err := c.vp.Unmarshal(c); err != nil {
 					log.Error().Err(err).Msg("unable to unmarshall remote config")
+					continue
+				}
+
+				if cmp.Diff(conf, c.Postgres, cmpopts.SortSlices(func(a, b string) bool { return a < b })) != "" {
+					c.Postgres.Changed <- struct{}{}
 				}
 			case <-ctx.Done():
 				return

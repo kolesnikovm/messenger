@@ -216,6 +216,13 @@ func (c *ServerConfig) Watch(ctx context.Context) {
 				c.Postgres.URL = nil
 				c.Postgres.NewURL = nil
 
+				// возникает гонка с /messenger/src/archiver/kafka/consumer.go:36
+				// в горутине старта используется конфиг, может произойти в момент обновления
+				// обновлять точечно конфиг постгри?
+				// confPost := &Postgres{
+				// 	Changed: c.Postgres.Changed,
+				// }
+
 				if err := c.vp.Unmarshal(c); err != nil {
 					log.Error().Err(err).Msg("unable to unmarshall remote config")
 					continue

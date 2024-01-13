@@ -109,3 +109,24 @@ func TestGetChatsStore(t *testing.T) {
 	_, err = messageStore.GetChats(ctx, 1)
 	require.NoError(t, err)
 }
+
+func TestShardsUpdate(t *testing.T) {
+	config, err := configs.NewServerConfig("")
+	require.NoError(t, err)
+
+	db, err := postgres.New(&config.Postgres)
+	require.NoError(t, err)
+
+	messageStore := messages.New(db, &config.Postgres)
+
+	ctx := context.Background()
+
+	db.WatchResharding(ctx)
+
+	go func() {
+		config.Postgres.Changed <- struct{}{}
+	}()
+
+	_, err = messageStore.GetChats(ctx, 1)
+	require.NoError(t, err)
+}

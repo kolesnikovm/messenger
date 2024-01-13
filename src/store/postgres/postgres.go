@@ -20,8 +20,10 @@ type DB struct {
 
 func New(conf *configs.Postgres) (*DB, error) {
 	db := &DB{
-		config:      conf,
-		connections: map[string]*pgxpool.Pool{},
+		config:          conf,
+		connections:     map[string]*pgxpool.Pool{},
+		PartitionSet:    &partitions.PartitionSet{},
+		NewPartitionSet: &partitions.PartitionSet{},
 	}
 
 	if err := db.createShards(); err != nil {
@@ -33,6 +35,7 @@ func New(conf *configs.Postgres) (*DB, error) {
 
 func (d *DB) Close() {
 	d.PartitionSet.Close()
+	d.NewPartitionSet.Close()
 }
 
 func (d *DB) WatchResharding(ctx context.Context) {
@@ -73,8 +76,8 @@ func (d *DB) createShards() error {
 		return err
 	}
 
-	// mutex
 	d.PartitionSet = partitionSet
+	// atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&d.PartitionSet)), unsafe.Pointer(partitionSet))
 
 	if len(d.config.NewURL) != 0 {
 		newPartitionSet, err := d.createConsistentHash(d.config.NewURL)
@@ -82,7 +85,6 @@ func (d *DB) createShards() error {
 			return err
 		}
 
-		// mutex
 		d.NewPartitionSet = newPartitionSet
 	}
 

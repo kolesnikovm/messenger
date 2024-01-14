@@ -8,7 +8,9 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
+	"unsafe"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -206,29 +208,18 @@ func (c *ServerConfig) Watch(ctx context.Context) {
 					continue
 				}
 
-				conf := c.Postgres
-				conf.URL = nil
-				conf.URL = append(conf.URL, c.Postgres.URL...)
-				conf.NewURL = nil
-				conf.NewURL = append(conf.NewURL, c.Postgres.NewURL...)
-
+				newConf := *c
 				// nil slices in case of shrinking
-				c.Postgres.URL = nil
-				c.Postgres.NewURL = nil
+				newConf.Postgres.URL = nil
+				newConf.Postgres.NewURL = nil
 
-				// возникает гонка с /messenger/src/archiver/kafka/consumer.go:36
-				// в горутине старта используется конфиг, может произойти в момент обновления
-				// обновлять точечно конфиг постгри?
-				// confPost := &Postgres{
-				// 	Changed: c.Postgres.Changed,
-				// }
-
-				if err := c.vp.Unmarshal(c); err != nil {
+				if err := c.vp.Unmarshal(&newConf); err != nil {
 					log.Error().Err(err).Msg("unable to unmarshall remote config")
 					continue
 				}
 
-				if cmp.Diff(conf, c.Postgres, cmpopts.SortSlices(func(a, b string) bool { return a < b })) != "" {
+				if cmp.Diff(c.Postgres, newConf.Postgres, cmpopts.SortSlices(func(a, b string) bool { return a < b })) != "" {
+					atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&c)), unsafe.Pointer(&newConf))
 					c.Postgres.Changed <- struct{}{}
 				}
 			case <-ctx.Done():

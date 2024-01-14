@@ -1,7 +1,7 @@
 LISTEN_PORT?=9999
 
 server:
-	cd src; LISTEN_PORT=${LISTEN_PORT} go run main.go server
+	cd src; LISTEN_PORT=${LISTEN_PORT} go run -race main.go server
 
 .PHONY: wire
 wire: mockery

@@ -1,18 +1,26 @@
 package configs
 
 import (
+	"context"
 	"errors"
 	"net"
 	"os"
 	"reflect"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
+	"unsafe"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
+	_ "github.com/spf13/viper/remote"
 )
+
+const watchInterval = 5 * time.Second
 
 func newViper() *viper.Viper {
 	vp := viper.New()
@@ -35,6 +43,8 @@ func newViper() *viper.Viper {
 
 	vp.SetDefault("server_address", "127.0.0.1:9101")
 
+	vp.SetDefault("consul.url", "localhost:8500")
+
 	return vp
 }
 
@@ -49,8 +59,12 @@ type Address struct {
 
 type Postgres struct {
 	URL             []string      `mapstructure:"url"`
+	NewURL          []string      `mapstructure:"new_url"`
+	Resharding      bool          `mapstructure:"resharding"`
 	MaxConns        int32         `mapstructure:"max_connections"`
 	MaxConnLifetime time.Duration `mapstructure:"max_connection_lifetime"`
+
+	Changed chan struct{}
 }
 
 type Archiver struct {
@@ -64,6 +78,8 @@ type Kafka struct {
 }
 
 type ServerConfig struct {
+	vp *viper.Viper
+
 	ListenPort     int      `mapstructure:"listen_port"`
 	MetricsAddress string   `mapstructure:"metrics_address"`
 	Kafka          Kafka    `mapstructure:"kafka"`
@@ -124,32 +140,91 @@ func load(cfgFile string) (*viper.Viper, error) {
 		}
 	}
 
+	err := vp.AddRemoteProvider("consul", vp.GetString("consul.url"), "MESSENGER/CONFIG")
+	if err != nil {
+		log.Error().Err(err).Msg("unable to add remote provider")
+
+		return vp, nil
+	}
+
+	vp.SetConfigType("json")
+
+	err = vp.ReadRemoteConfig()
+	if err != nil {
+		log.Error().Err(err).Msg("unable to read remote config")
+	}
+
 	return vp, nil
 }
 
-func newConf[V Config](cfgFile string, conf V) (V, error) {
+func newConf[V Config](cfgFile string, conf *V) (*V, *viper.Viper, error) {
 	vp, err := load(cfgFile)
 	if err != nil {
-		return conf, err
+		return conf, nil, err
 	}
 
-	err = vp.Unmarshal(&conf, viper.DecodeHook(mapstructure.ComposeDecodeHookFunc(
+	err = vp.Unmarshal(conf, viper.DecodeHook(mapstructure.ComposeDecodeHookFunc(
 		mapstructure.StringToSliceHookFunc(","),
 		decodeHookFunc(),
 	)))
 	if err != nil {
-		return conf, err
+		return conf, nil, err
 	}
 
-	return conf, nil
+	return conf, vp, nil
 }
 
-func NewClientConfig(cfgFile string) (ClientConfig, error) {
+func NewClientConfig(cfgFile string) (*ClientConfig, error) {
 	var conf ClientConfig
-	return newConf(cfgFile, conf)
+
+	clientConfig, _, err := newConf(cfgFile, &conf)
+
+	return clientConfig, err
 }
 
-func NewServerConfig(cfgFile string) (ServerConfig, error) {
+func NewServerConfig(cfgFile string) (*ServerConfig, error) {
 	var conf ServerConfig
-	return newConf(cfgFile, conf)
+
+	serverConfig, vp, err := newConf(cfgFile, &conf)
+
+	serverConfig.vp = vp
+
+	serverConfig.Postgres.Changed = make(chan struct{})
+
+	return serverConfig, err
+}
+
+func (c *ServerConfig) Watch(ctx context.Context) {
+	go func() {
+		ticker := time.NewTicker(watchInterval)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				err := c.vp.WatchRemoteConfig()
+				if err != nil {
+					log.Error().Err(err).Msg("unable to read remote config")
+					continue
+				}
+
+				newConf := *c
+				// nil slices in case of shrinking
+				newConf.Postgres.URL = nil
+				newConf.Postgres.NewURL = nil
+
+				if err := c.vp.Unmarshal(&newConf); err != nil {
+					log.Error().Err(err).Msg("unable to unmarshall remote config")
+					continue
+				}
+
+				if cmp.Diff(c.Postgres, newConf.Postgres, cmpopts.SortSlices(func(a, b string) bool { return a < b })) != "" {
+					atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&c)), unsafe.Pointer(&newConf))
+					c.Postgres.Changed <- struct{}{}
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
 }

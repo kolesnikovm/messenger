@@ -16,7 +16,7 @@ import (
 
 type Consumer struct {
 	MessageStore store.Messages
-	Config       configs.Archiver
+	Config       *configs.Archiver
 	Backoff      *backoff.ExponentialBackOff
 }
 

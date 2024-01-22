@@ -16,7 +16,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeApplication(conf configs.ServerConfig) (*application, func(), error) {
+func InitializeApplication(conf *configs.ServerConfig) (*application, func(), error) {
 	messageSender, cleanup, err := di.ProvideNotifier(conf)
 	if err != nil {
 		return nil, nil, err
@@ -46,6 +46,7 @@ func InitializeApplication(conf configs.ServerConfig) (*application, func(), err
 		grpcServer: server,
 		archiver:   archiver,
 		notifier:   messageSender,
+		database:   db,
 	}
 	return serverApplication, func() {
 		cleanup3()

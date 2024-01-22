@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/kolesnikovm/messenger/entity"
 	"github.com/oklog/ulid/v2"
 )
@@ -24,14 +25,41 @@ const (
 )
 
 func (m *Messages) GetMessageHistory(ctx context.Context, fromMessageID ulid.ULID, chatID string, messageCount uint32, direction string) ([]*entity.Message, error) {
-	const op = "Messages.GetMessageHistory"
+	shard := m.DB.PartitionSet.Get(chatID)
+	messages, err := getMessageHistory(ctx, fromMessageID, chatID, messageCount, direction, shard)
+	if err != nil {
+		return nil, err
+	}
+
+	if m.Config.Resharding {
+		newShard := m.DB.NewPartitionSet.Get(chatID)
+		newMessages, err := getMessageHistory(ctx, fromMessageID, chatID, messageCount, direction, newShard)
+		if err != nil {
+			return nil, err
+		}
+
+		lessFunc := func(i, j int) bool {
+			cmp := messages[i].MessageID.Compare(newMessages[j].MessageID)
+			if direction == "FORWARD" {
+				return cmp < 0
+			}
+			return cmp > 0
+		}
+		messages = merge(messages, newMessages, messageCount, lessFunc)
+	}
+
+	return messages, nil
+}
+
+func getMessageHistory(ctx context.Context, fromMessageID ulid.ULID, chatID string, messageCount uint32, direction string, shard *pgxpool.Pool) ([]*entity.Message, error) {
+	const op = "Messages.getMessageHistory"
 
 	selectMessages := selectMessagesBackward
 	if direction == "FORWARD" {
 		selectMessages = selectMessagesForward
 	}
 
-	rows, err := m.DB.PartitionSet.Get(chatID).Query(ctx, selectMessages, chatID, fromMessageID, messageCount)
+	rows, err := shard.Query(ctx, selectMessages, chatID, fromMessageID, messageCount)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
@@ -104,6 +132,36 @@ func getRecipientID(chatID string, senderID uint64) (uint64, error) {
 	}
 
 	return 0, fmt.Errorf("%s: failed to determine recipient id", op)
+}
+
+func merge(messages1, messages2 []*entity.Message, messageCount uint32, less func(i, j int) bool) []*entity.Message {
+	messages := make([]*entity.Message, 0, messageCount)
+	idx1, idx2 := 0, 0
+
+	for idx1 < len(messages1) && idx2 < len(messages2) && messageCount > 0 {
+		if less(idx1, idx2) {
+			messages = append(messages, messages1[idx1])
+			idx1++
+		} else {
+			messages = append(messages, messages2[idx2])
+			idx2++
+		}
+		messageCount--
+	}
+
+	for idx1 < len(messages1) && messageCount > 0 {
+		messages = append(messages, messages1[idx1])
+		idx1++
+		messageCount--
+	}
+
+	for idx2 < len(messages2) && messageCount > 0 {
+		messages = append(messages, messages2[idx2])
+		idx2++
+		messageCount--
+	}
+
+	return messages
 }
 
 func (id *dbMessageID) Scan(src interface{}) error {
